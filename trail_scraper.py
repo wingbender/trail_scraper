@@ -2,6 +2,9 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 
+#TODO: find trail location (long/lat or at least contry)
+#TODO: get user id for each trail
+
 def get_trail(trail_page_url):
     """
     extract the trail data from it's page
@@ -14,6 +17,11 @@ def get_trail(trail_page_url):
 
 
 def get_headers():
+    """
+    generate headers to use when accessing a url
+    #TODO implement random header generator
+    :return:
+    """
     headers = {'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
                              'Chrome/77.0.3865.120 Safari/537.36'}
     return headers
@@ -22,6 +30,7 @@ def get_headers():
 def get_page(page_url):
     """
     returns an HTML string from page URL
+    #TODO: add logging
     :param page_url:
     :return: string HTMLstring
     """
@@ -40,7 +49,24 @@ def get_page(page_url):
         return -1
 
 
+def get_trail_categories():
+    """
+    extracts the categories names and urls from main page
+    :return:
+    """
+    #TODO: finish extraction of trail categories
+    root_path = 'https://www.wikiloc.com/'
+    root_HTML_string = get_page(root_path)
+    root_soup = bs(root_HTML_string.content, 'html.parser')
+    trail_categories_container = root_soup.find(id="trail-slider")
+    categories = dict()
+    for hyperlink in trail_categories_container.find_all('a', href=True, title=True):
+         categories[hyperlink['title']] =  hyperlink['href']
+    return categories
+
+
 def get_trails_urls(**filters):
+    # TODO: scan a category for it's trails and trail urls
     pass
 
 
@@ -52,6 +78,7 @@ def extract_trail_data(trail_html):
     :param trail_html:
     :return:
     """
+    # TODO: work better with bs
     trail_id = int(str.rsplit(trail_html.url, '-', 1)[1])
     trail_soup = bs(trail_html.content, 'html.parser')
     trail_data_container = trail_soup.find(id="trail-data")
@@ -73,6 +100,7 @@ def process_trail_data_string(raw_data_string):
     """
     data_list = raw_data_string.split('\xa0')
     if len(data_list) == 2:
+        # TODO: Handle time from words to numeric values
         attribute = data_list[0]
         value = data_list[1]
         units = 'None'
@@ -81,7 +109,7 @@ def process_trail_data_string(raw_data_string):
         value = data_list[1]
         units = data_list[2]
     if len(data_list) == 4:
-        attribute = data_list[0]+data_list[1]
+        attribute = data_list[0] + ' ' + data_list[1]
         value = data_list[2]
         units = data_list[3]
     return attribute, value, units
@@ -91,13 +119,14 @@ def test():
     trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
     trail_id, trail_data = get_trail(trail_path)
     print(trail_id)
-    print(trail_data)
+    print('\n'.join([f'{key} : {value[0]} \t {value[1]}' for key,value in trail_data.items()]))
 
 
 def main():
-    pass
+    print(get_trail_categories())
+    # pass
 
 
 if __name__ == '__main__':
     test()
-    main()
+    # main()
