@@ -32,7 +32,7 @@ def get_page(page_url):
     returns an HTML string from page URL
     #TODO: add logging
     :param page_url:
-    :return: string HTMLstring
+    :return: string HTML string
     """
     try:
         page = requests.get(page_url, headers=get_headers())
@@ -70,26 +70,26 @@ def get_trails_urls(**filters):
     pass
 
 
-def extract_trail_data(trail_html):
+def extract_trail_data(trail_page):
     """
     extracts the trail details from an HTML string.
-    returns trail ID and trail_data dictionary where trail_data.keys() are the trail attributes and the values are
-    tuples of numeric value and measurment units
-    :param trail_html:
-    :return:
+    returns trail_data dictionary where trail_data.keys() are the trail attributes and the values are
+    tuples of numeric value and measurement units
+    :param trail_paeg (text):
+    :return: trail_data (dict)
     """
     # TODO: work better with bs
-    trail_id = int(str.rsplit(trail_html.url, '-', 1)[1])
-    trail_soup = bs(trail_html.content, 'html.parser')
+    trail_id = int(str.rsplit(trail_page.url, '-', 1)[1])
+    trail_soup = bs(trail_page.content, 'html.parser')
     trail_data_container = trail_soup.find(id="trail-data")
-    trail_data = dict()
+    trail_data = {'id': trail_id}
     for hyperlink in trail_data_container.find_all('a', href=True, title=True):
         attribute, value, units = process_trail_data_string(hyperlink['title'])
         trail_data[attribute] = (value, units)
     for small_title in trail_data_container.find_all('h4'):
         attribute, value, units = process_trail_data_string(small_title.text)
         trail_data[attribute] = (value, units)
-    return trail_id, trail_data
+    return trail_data
 
 
 def process_trail_data_string(raw_data_string):
@@ -103,30 +103,37 @@ def process_trail_data_string(raw_data_string):
         # TODO: Handle time from words to numeric values
         attribute = data_list[0]
         value = data_list[1]
-        units = 'None'
-    if len(data_list) == 3:
-        attribute = data_list[0]
-        value = data_list[1]
-        units = data_list[2]
-    if len(data_list) == 4:
-        attribute = data_list[0] + ' ' + data_list[1]
-        value = data_list[2]
-        units = data_list[3]
+        units = None  # 'bool'
+    elif len(data_list) >= 3:
+        attribute = ' '.join(data_list[0:-2])
+        value = data_list[-2]
+        units = data_list[-1]
     return attribute, value, units
 
+# def organize_data(attribute, value, units):
+# 	"""  """
 
-def test():
-    trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
-    trail_id, trail_data = get_trail(trail_path)
-    print(trail_id)
-    print('\n'.join([f'{key} : {value[0]} \t {value[1]}' for key,value in trail_data.items()]))
+def data_test():
+    # trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
+    # trail_id, trail_data = get_trail(trail_path)
+    with open('Wikiloc_test_page.html', 'r', encoding='utf-8') as html_page:
+        html_data = html_page.read()
+
+    class MakeTestPage:
+        content = html_data
+        url = 'Wikiloc_test_page-1'
+
+    test_page = MakeTestPage()
+
+    trail_data = extract_trail_data(test_page)
+    print('\n'.join([f'{key} : {value[0]} \t {value[1]}' for key, value in trail_data.items()]))
 
 
 def main():
-    print(get_trail_categories())
+    # print(get_trail_categories())
     # pass
+    data_test()
 
 
 if __name__ == '__main__':
-    test()
-    # main()
+    main()
