@@ -26,7 +26,7 @@ def extract_trail_data(trail_page):
     :param trail_page (text)
     :return: trail_data (dict)
     """
-    # TODO: work better with bs
+    # TODO: add to 'trail_data' dictionary: 1) trail category, 2) user_id/name 3) category
     trail_id = int(str.rsplit(trail_page.url, '-', 1)[1])
     trail_soup = bs(trail_page.content, 'html.parser')
     trail_data_container = trail_soup.find(id="trail-data")
@@ -64,14 +64,22 @@ def convert_values(attribute, value, units):
      1. No / Yes -> bool True / False
      2. numerical values as floats
      3. datetime strings in *** format """
-    if value == 'Yes' or value == 'No':
-        units = 'bool'
+    if value == 'Yes' or value == 'No':  # No / Yes -> bool True / False
+        out_units = 'bool'
         if value == 'Yes':
-            value = True
+            out_value = True
         else:
-            value == False
-
-
+            out_value = False
+    elif value.count(' ') == 0 and units is not None:  # numerical values as floats
+        out_value = float(value.replace(',', ''))
+        if units == 'feet':
+            out_value = out_value * 0.3048
+            out_units = 'm'
+        elif units == 'miles':
+            out_value = out_value * 1.6093
+            out_units = 'km'
+    elif value.
+    return out_value, out_units
 
 def data_test():
     # trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
