@@ -48,10 +48,9 @@ def process_trail_data_string(raw_data_string):
     """
     data_list = raw_data_string.split('\xa0')
     if len(data_list) == 2:
-        # TODO: Handle time from words to numeric values
         attribute = data_list[0]
         value = data_list[1]
-        units = None  # 'bool'
+        units = None
     elif len(data_list) >= 3:
         attribute = ' '.join(data_list[0:-2])
         value = data_list[-2]
@@ -59,27 +58,39 @@ def process_trail_data_string(raw_data_string):
     return attribute, value, units
 
 
-def convert_values(attribute, value, units):
-    """ Function takes attribute, values and units and returns corrected entries:
+def convert_values(trail_data):
+    """ Function takes trail_data dictionary and returns corrected entries:
      1. No / Yes -> bool True / False
      2. numerical values as floats
      3. datetime strings in *** format """
-    if value == 'Yes' or value == 'No':  # No / Yes -> bool True / False
-        out_units = 'bool'
-        if value == 'Yes':
-            out_value = True
-        else:
-            out_value = False
-    elif value.count(' ') == 0 and units is not None:  # numerical values as floats
-        out_value = float(value.replace(',', ''))
-        if units == 'feet':
-            out_value = out_value * 0.3048
-            out_units = 'm'
-        elif units == 'miles':
-            out_value = out_value * 1.6093
-            out_units = 'km'
-    elif value.
-    return out_value, out_units
+    bool_attributes = ['Ends at start point (loop)']
+    numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
+                         'Elevation gain downhill', 'Elevation min']
+    time_attributes = ['Time', 'Uploaded', 'Recorded']
+
+    for attribute, value in trail_data.items():
+        out_value = ['', '']
+        if attribute in bool_attributes:
+            if value[0] == 'Yes':
+                out_value[0] = True
+            else:
+                out_value[0] = False
+            out_value[1] = 'bool'
+        elif attribute in numeric_attributes:  # numerical values as floats and unit conversion
+            out_value[0] = float(value.replace(',', ''))
+            if value[1] == 'feet':
+                out_value[0] = out_value[0] * 0.3048
+                out_value[1] = 'm'
+            elif value[1] == 'miles':
+                out_value[0] = out_value[0] * 1.6093
+                out_value[1] = 'km'
+        elif attribute in time_attributes:
+        # TODO: insert datetime conversion. need to think of correct format, numerical?
+
+        trail_data[attribute] = out_value
+    trail_data['Coordinates'] = [int(trail_data['Coordinates'][0]), None]
+    trail_data['Technical Difficulty'] = list(trail_data['Technical Difficulty'])
+    return trail_data
 
 def data_test():
     # trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
