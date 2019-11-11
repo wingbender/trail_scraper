@@ -5,7 +5,6 @@ import re
 
 
 # TODO: find trail location (long/lat or at least country)
-# TODO: get user id for each trail
 
 
 def get_trail(trail_page_url):
