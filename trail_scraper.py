@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
+from webfunctions import get_page
+
 
 
 MAX_TRAILS_PER_PAGE = 25
