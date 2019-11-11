@@ -129,8 +129,20 @@ def process_trail_data_string(raw_data_string):
         units = data_list[-1]
     return attribute, value, units
 
-# def organize_data(attribute, value, units):
-# 	"""  """
+
+def convert_values(attribute, value, units):
+    """ Function takes attribute, values and units and returns corrected entries:
+     1. No / Yes -> bool True / False
+     2. numerical values as floats
+     3. datetime strings in *** format """
+    if value == 'Yes' or value == 'No':
+        units = 'bool'
+        if value == 'Yes':
+            value = True
+        else:
+            value == False
+
+
 
 def data_test():
     # trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
@@ -139,10 +151,12 @@ def data_test():
         html_data = html_page.read()
 
     class MakeTestPage:
-        content = html_data
-        url = 'Wikiloc_test_page-1'
+        """ Class to create a mock page for """
+        def __init__(self, content, url):
+            self.content = content
+            self.url = url
 
-    test_page = MakeTestPage()
+    test_page = MakeTestPage(html_data, 'Wikiloc_test_page-1')
 
     trail_data = extract_trail_data(test_page)
     print('\n'.join([f'{key} : {value[0]} \t {value[1]}' for key, value in trail_data.items()]))
