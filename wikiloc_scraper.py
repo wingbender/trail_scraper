@@ -3,6 +3,9 @@ from trail_scraper import get_trail
 from webfunctions import get_page
 
 
+MAX_TRAILS_PER_PAGE = 25
+
+
 def get_trail_categories():
     """
     extracts the categories names and urls from https://www.wikiloc.com/trails
@@ -65,8 +68,12 @@ def main():
 
     trails_dictionary = get_trails_urls(categories_dictionary[cat_to_scrape], trails_to_scrape)
 
+    for i, trail_id in enumerate(trails_dictionary.keys()):
+        print(f'trail #{i+1} of {trails_to_scrape}: {trails_dictionary[trail_id][0]}')
+        trails_dictionary[trail_id] = get_trail(trails_dictionary[trail_id][1])
+
     for trail_id in trails_dictionary.keys():
-        print(trails_dictionary[trail_id][1])
+        print(trails_dictionary[trail_id])
 
     # print(len(trails_dictionary.keys()))
     # print('\n'.join([f'{key} : {value[0]} - {value[1]}' for key, value in trails_dictionary.items()]))

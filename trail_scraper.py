@@ -3,10 +3,6 @@ from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
 
 
-
-MAX_TRAILS_PER_PAGE = 25
-
-
 # TODO: find trail location (long/lat or at least contry)
 # TODO: get user id for each trail
 
@@ -18,77 +14,8 @@ def get_trail(trail_page_url):
     :return: dict trail_data
     """
     trail_page = get_page(trail_page_url)
-    trail_id, trail_data = extract_trail_data(trail_page)
-    return trail_id, trail_data
-
-
-def get_headers():
-    """
-    generate headers to use when accessing a url
-    # TODO implement random header generator
-    :return:
-    """
-    headers = {'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                             'Chrome/77.0.3865.120 Safari/537.36'}
-    return headers
-
-
-def get_page(page_url):
-    """
-    returns an HTML string from page URL
-    # TODO: add logging
-    :param page_url:
-    :return: string HTML string
-    """
-    try:
-        page = requests.get(page_url, headers=get_headers())
-        page.raise_for_status()
-    except requests.HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')
-        return -1
-    except Exception as err:
-        print(f'Non HTTP error occurred: {err}')
-        return -1
-    if page.status_code == 200:
-        return page
-    else:
-        return -1
-
-
-def get_trail_categories():
-    """
-    extracts the categories names and urls from https://www.wikiloc.com/trails
-    :return: dictionary category:url
-    """
-    root_path = 'https://www.wikiloc.com/trails'
-    root_html_string = get_page(root_path)
-    root_soup = bs(root_html_string.content, 'html.parser')
-    activities_container = root_soup.find('section', class_='activities-list row')
-    activities = activities_container.find_all('a')
-    categories = dict()
-    for activity in activities:
-        categories[activity.text[:-len(' trails')]] = activity['href']
-    return categories
-
-
-def get_trails_urls(category_url, max_trails=50):
-    """
-    scans a category from the last uploaded trails back until reaching max_trails trails
-    :param category_url:
-    :param max_trails:
-    :return: dict {trail_id : (trail_name, trail_url)}
-    """
-    trails_dict = dict()
-
-    # maximum number of trails per page (MAX_TRAILS_PER_PAGE) is determined by wikiloc (25)
-    for i in range(0, max_trails, MAX_TRAILS_PER_PAGE):
-        trails_list_url = category_url + f'&s=last&from={i}&to={min(i+MAX_TRAILS_PER_PAGE , max_trails)}'
-        trails_list_html = get_page(trails_list_url)
-        trail_list_soup = bs(trails_list_html.content, 'html.parser')
-        trail_list_container = trail_list_soup.find('ul', class_='trail-list')
-        for trail in trail_list_container.find_all('a', class_='trail-title'):
-            trails_dict[int(trail['href'].rsplit('-', 1)[1])] = (trail.text, trail['href'])
-    return trails_dict
+    trail_data = extract_trail_data(trail_page)
+    return trail_data
 
 
 def extract_trail_data(trail_page):
@@ -96,7 +23,7 @@ def extract_trail_data(trail_page):
     extracts the trail details from an HTML string.
     returns trail_data dictionary where trail_data.keys() are the trail attributes and the values are
     tuples of numeric value and measurement units
-    :param trail_paeg (text):
+    :param trail_page (text)
     :return: trail_data (dict)
     """
     # TODO: work better with bs
@@ -165,18 +92,7 @@ def data_test():
 
 
 def main():
-    ## get all category names and urls:
-    categories_dictionary = get_trail_categories()
-    category_names = list(categories_dictionary.keys())
-    # print(category_names)
 
-    ## loop through a category to extract all the trails in it starting from the latest
-
-    trails_dictionary = get_trails_urls(categories_dictionary[category_names[0]], 50)
-    # print(len(trails_dictionary.keys()))
-    # print('\n'.join([f'{key} : {value[0]} - {value[1]}' for key, value in trails_dictionary.items()]))
-    # print(get_trail_categories())
-    # pass
     data_test()
 
 
