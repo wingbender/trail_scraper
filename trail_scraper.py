@@ -26,18 +26,21 @@ def extract_trail_data(trail_page):
     :param trail_page (text)
     :return: trail_data (dict)
     """
-    # TODO: add to 'trail_data' dictionary: 1) trail category, 2) user_id/name 3) category
     trail_id = int(str.rsplit(trail_page.url, '-', 1)[1])
     trail_soup = bs(trail_page.content, 'html.parser')
     trail_data = {'id': [trail_id, None]}  # add 2nd item of None for unit field in dictionary. same for other unitless attributes
-    # getting trail category from trail url
-    trail_url_container = trail_soup.find('link', attrs={'rel': "canonical"})
-    url = trail_url_container['href']
-    trail_data['category'] = [re.search('.com/(\S+)-trails', url)[1], None]
     # user name and id
     user_id_container = trail_soup.find('a', attrs={"class": "user-image"})
     trail_data['user_name'] = [user_id_container['title'], None]
     trail_data['user_id'] = [int(user_id_container['href'].split('=')[-1]), None]
+    # country and trail category
+    country_category_container = trail_soup.find('div', attrs={'class':"crumbs display"})
+    trail_data['category'] = [country_category_container.find("strong").text, None]
+    country = country_category_container.find("span")
+    if country is not None:
+        trail_data['country'] = [country.text.split(' ')[-1], None]
+    else:
+        trail_data['country'] = ['Unknown', None]
     # get trail data
     trail_data_container = trail_soup.find(id="trail-data")
     for hyperlink in trail_data_container.find_all('a', href=True, title=True):
@@ -77,7 +80,7 @@ def convert_values(trail_data):
     numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
                          'Elevation gain downhill', 'Elevation min']
     time_attributes = ['Time', 'Uploaded', 'Recorded']
-    id_attributes = ['id', 'category', 'user_name', 'user_id']
+    id_attributes = ['id', 'category', 'country', 'user_name', 'user_id']
 
     for attribute, value in trail_data.items():
         out_value = ['', '']
