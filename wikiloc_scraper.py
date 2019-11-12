@@ -73,6 +73,9 @@ def main():
         trails_dictionary[trail_id] = get_trail(trails_dictionary[trail_id][1])
 
     for trail_id in trails_dictionary.keys():
+        # for tag in ['Time', 'Moving time', 'Uploaded', 'Recorded']:
+        #     if tag in trails_dictionary[trail_id]:
+        #         print(trails_dictionary[trail_id][tag][0])
         print(trails_dictionary[trail_id])
 
     # print(len(trails_dictionary.keys()))

@@ -6,6 +6,12 @@ import re
 
 # TODO: find trail location (long/lat or at least country)
 
+MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8,
+          'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
+          'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
+          1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12
+          }
+
 
 def get_trail(trail_page_url):
     """
@@ -15,6 +21,7 @@ def get_trail(trail_page_url):
     """
     trail_page = get_page(trail_page_url)
     trail_data = extract_trail_data(trail_page)
+    trail_data = convert_values(trail_data)
     return trail_data
 
 
@@ -78,8 +85,9 @@ def convert_values(trail_data):
     new_data = {}
     bool_attributes = ['Ends at start point (loop)']
     numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
-                         'Elevation gain downhill', 'Elevation min']
-    time_attributes = ['Time', 'Uploaded', 'Recorded']
+                          'Elevation gain downhill', 'Elevation min']
+    time_attributes = ['Time', 'Moving time']
+    date_attributes = ['Uploaded', 'Recorded']
     id_attributes = ['id', 'category', 'country', 'user_name', 'user_id']
 
     for attribute, value in trail_data.items():
@@ -100,8 +108,28 @@ def convert_values(trail_data):
             elif value[1] == 'miles':
                 out_value[0] = out_value[0] * 1.6093
                 out_value[1] = 'km'
-        # elif attribute in time_attributes:
-        # TODO: insert datetime conversion. need to think of correct format, numerical?
+        elif attribute in time_attributes:
+
+            total_time_minutes = 0
+            # (regex, multiplier to minutes)
+            for regex, multiplier in [(r"([\d]*) days", 24 * 60), (r"([\d]*) hour", 60), (r"([\d]*) minute", 1)]:
+                match = re.search(regex, value[0].replace('one', '1'))
+                if match:
+                    total_time_minutes += int(match.groups()[0]) * multiplier
+            out_value[0] = total_time_minutes
+            out_value[1] = 'minutes'
+        elif attribute in date_attributes:
+            date_string = 'YYYY-MM-DD'
+            for part_symbol, regex in [('MM', r"([A-Z][a-z]*)"), ('DD', r"([0-9]{1,2}),"), ('YYYY', r"(20[0-9]{2})")]:
+                match = re.search(regex, value[0].replace('one', '1'))
+                if match:
+                    match_content = match.groups()[0]
+                    if match_content.isdigit():
+                        date_string = date_string.replace(part_symbol, '{:02d}'.format(int(match_content)))
+                    else:
+                        date_string = date_string.replace(part_symbol, str(MONTHS[match_content.lower()]))
+            out_value[0] = date_string.replace('-DD', '')
+            out_value[1] = 'YYYY-MM(-DD)'
         else:
             continue
         new_data[attribute] = out_value
