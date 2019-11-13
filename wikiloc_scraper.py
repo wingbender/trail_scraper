@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup as bs
-from trail_scraper import get_trail
 from webfunctions import get_page
 from helperfunctions import parse_range_list
+from trail_scraper import get_trail
 
 
 MAX_TRAILS_PER_PAGE = 25
@@ -88,10 +88,10 @@ def main():
     # pass
 
 
-def test():
-    pass
+# def test():
+#     pass
 
 
 if __name__ == '__main__':
-    test()
+    # test()
     main()

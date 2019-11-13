@@ -12,7 +12,6 @@ def get_headers():
                              'Chrome/77.0.3865.120 Safari/537.36'}
     return headers
 
-
 def get_page(page_url):
     """
     returns an HTML string from page URL

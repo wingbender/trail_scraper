@@ -1,10 +1,6 @@
-import requests
 from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
 import re
-
-
-# TODO: find trail location (long/lat or at least country)
 
 MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8,
           'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
@@ -35,11 +31,14 @@ def extract_trail_data(trail_page):
     """
     trail_id = int(str.rsplit(trail_page.url, '-', 1)[1])
     trail_soup = bs(trail_page.content, 'html.parser')
-    trail_data = {'id': [trail_id, None]}  # add 2nd item of None for unit field in dictionary. same for other unitless attributes
+    trail_data = {}
+    trail_data['id'] = [trail_id, None]  # add 2nd item of None for unit field in dictionary. same for other unitless attributes
+    trail_data['title'] = [trail_soup.find('h1').text.strip(), None]
     # user name and id
     user_id_container = trail_soup.find('a', attrs={"class": "user-image"})
     trail_data['user_name'] = [user_id_container['title'], None]
     trail_data['user_id'] = [int(user_id_container['href'].split('=')[-1]), None]
+    title_container = trail_soup.find('h1')
     # country and trail category
     country_category_container = trail_soup.find('div', attrs={'class':"crumbs display"})
     trail_data['category'] = [country_category_container.find("strong").text, None]
@@ -88,18 +87,20 @@ def convert_values(trail_data):
                           'Elevation gain downhill', 'Elevation min']
     time_attributes = ['Time', 'Moving time']
     date_attributes = ['Uploaded', 'Recorded']
-    id_attributes = ['id', 'category', 'country', 'user_name', 'user_id']
+    id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id']
 
     for attribute, value in trail_data.items():
         out_value = ['', '']
         if attribute in id_attributes:
             out_value = value
+
         elif attribute in bool_attributes:
             if value[0] == 'Yes':
                 out_value[0] = True
             else:
                 out_value[0] = False
             out_value[1] = 'bool'
+
         elif attribute in numeric_attributes:  # numerical values as floats and unit conversion
             out_value[0] = float(value[0].replace(',', ''))
             if value[1] == 'feet':
@@ -108,8 +109,8 @@ def convert_values(trail_data):
             elif value[1] == 'miles':
                 out_value[0] = out_value[0] * 1.6093
                 out_value[1] = 'km'
-        elif attribute in time_attributes:
 
+        elif attribute in time_attributes:
             total_time_minutes = 0
             # (regex, multiplier to minutes)
             for regex, multiplier in [(r"([\d]*) days", 24 * 60), (r"([\d]*) hour", 60), (r"([\d]*) minute", 1)]:
@@ -118,6 +119,7 @@ def convert_values(trail_data):
                     total_time_minutes += int(match.groups()[0]) * multiplier
             out_value[0] = total_time_minutes
             out_value[1] = 'minutes'
+
         elif attribute in date_attributes:
             date_string = 'YYYY-MM-DD'
             for part_symbol, regex in [('MM', r"([A-Z][a-z]*)"), ('DD', r"([0-9]{1,2}),"), ('YYYY', r"(20[0-9]{2})")]:
@@ -130,12 +132,16 @@ def convert_values(trail_data):
                         date_string = date_string.replace(part_symbol, str(MONTHS[match_content.lower()]))
             out_value[0] = date_string.replace('-DD', '')
             out_value[1] = 'YYYY-MM(-DD)'
+
         else:
             continue
+
         new_data[attribute] = out_value
+
     # attributes outside of loop in order to change key name
     new_data['No of coordinates'] = [int(trail_data['Coordinates'][0]), None]
     new_data['Technical difficulty'] = list(trail_data['Technical difficulty:'])
+
     return new_data
 
 def data_test():
