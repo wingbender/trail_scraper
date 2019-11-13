@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup as bs
 from trail_scraper import get_trail
 from webfunctions import get_page
+from helperfunctions import parse_range_list
 
 
 MAX_TRAILS_PER_PAGE = 25
+MAX_TRAILS_IN_CATEGORY = 10000
 
 
 def get_trail_categories():
@@ -16,24 +18,27 @@ def get_trail_categories():
     root_soup = bs(root_html_string.content, 'html.parser')
     activities_container = root_soup.find('section', class_='activities-list row')
     activities = activities_container.find_all('a')
-    categories = dict()
-    for activity in activities:
-        categories[activity.text[:-len(' trails')]] = activity['href']
+    categories = [('all', '')]
+    for i, activity in enumerate(activities):
+        categories.append((activity.text[:-len(' trails')], activity['href']))
     return categories
 
 
-def get_trails_urls(category_url, max_trails=50):
+def get_trails_urls(category_url, from_trail=0, to_trail=50):
     """
     scans a category from the last uploaded trails back until reaching max_trails trails
     :param category_url:
-    :param max_trails:
+    :param from_trail:
+    :param to_trail:
     :return: dict {trail_id : (trail_name, trail_url)}
     """
     trails_dict = dict()
 
+    # TODO: expand the function to extract multiple categories
+
     # maximum number of trails per page (MAX_TRAILS_PER_PAGE) is determined by wikiloc (25)
-    for i in range(0, max_trails, MAX_TRAILS_PER_PAGE):
-        trails_list_url = category_url + f'&s=last&from={i}&to={min(i+MAX_TRAILS_PER_PAGE , max_trails)}'
+    for i in range(max(0, from_trail), min(to_trail,MAX_TRAILS_IN_CATEGORY), MAX_TRAILS_PER_PAGE):
+        trails_list_url = category_url + f'&s=last&from={i}&to={min(i + MAX_TRAILS_PER_PAGE, to_trail)}'
         trails_list_html = get_page(trails_list_url)
         trail_list_soup = bs(trails_list_html.content, 'html.parser')
         trail_list_container = trail_list_soup.find('ul', class_='trail-list')
@@ -43,33 +48,32 @@ def get_trails_urls(category_url, max_trails=50):
 
 
 def main():
-    ## get all category names and urls:
-    categories_dictionary = get_trail_categories()
-    category_names = list(categories_dictionary.keys())
-    print(category_names)
+    # get all category names and urls:
+    categories_list = get_trail_categories()
+    category_names = [f"[{str(i)}] {cat[0]}" for i, cat in enumerate(categories_list)]
+    print('\n'.join(category_names))
 
-    cat_to_scrape = input('Please select a category to scrape: ')
+    cat_to_scrape = input('Please select a category (number) to scrape: ')
 
-    while cat_to_scrape not in categories_dictionary.keys():
-        cat_to_scrape = input('Please select a category to scrape')
-
+    while not cat_to_scrape.isdigit() or int(cat_to_scrape) < 0:
+        cat_to_scrape = input('Please select a category (number) to scrape: ')
+    cat_to_scrape=int(cat_to_scrape)
     ## loop through a category to extract all the trails in it starting from the latest
+    trails_to_scrape = ['empty']
 
-    trails_to_scrape = None
-    while type(trails_to_scrape) is not int:
-        try:
-            trails_to_scrape = int(input("Please enter number of trails to scrape [-1 for all]: "))
-            if trails_to_scrape > 0:
-                print(f'scraping {trails_to_scrape} trails from {cat_to_scrape}')
-            elif trails_to_scrape == -1:
-                print(f'scraping all trails from {cat_to_scrape}')
-        except ValueError:
-            print("%s is not an integer.\n" % trails_to_scrape)
-
-    trails_dictionary = get_trails_urls(categories_dictionary[cat_to_scrape], trails_to_scrape)
+    try:
+        range_list = input("Please enter a range of trails to scrape "
+                           "in comma separated ranges , max is 10000 are: ")
+        range_list = parse_range_list(range_list)
+    except ValueError:
+        print(ValueError)
+        return
+    trails_dictionary = dict()
+    for rng in range_list:
+        trails_dictionary.update(get_trails_urls(categories_list[cat_to_scrape][1], from_trail=rng[0], to_trail=rng[1]))
 
     for i, trail_id in enumerate(trails_dictionary.keys()):
-        print(f'trail #{i+1} of {trails_to_scrape}: {trails_dictionary[trail_id][0]}')
+        print(f'trail #{i+1} of {len(trails_dictionary.keys())}: {trails_dictionary[trail_id][0]}')
         trails_dictionary[trail_id] = get_trail(trails_dictionary[trail_id][1])
 
     for trail_id in trails_dictionary.keys():
