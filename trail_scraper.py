@@ -44,7 +44,7 @@ def extract_trail_data(trail_page):
     trail_data['user_id'] = int(user_id_container['href'].split('=')[-1])
     title_container = trail_soup.find('h1')
     # country and trail category
-    country_category_container = trail_soup.find('div', attrs={'class':"crumbs display"})
+    country_category_container = trail_soup.find('div', attrs={'class': "crumbs display"})
     trail_data['category'] = country_category_container.find("strong").text
     country = country_category_container.find("span")
     if country is not None:
