@@ -5,6 +5,10 @@ from trail_scraper import get_trail
 import argparse
 import time
 
+# TODO: handle exceptions
+# TODO: add logging
+# TODO: add testing
+# TODO: improve documentation and commenting
 
 MAX_TRAILS_PER_PAGE = 25
 MAX_TRAILS_IN_CATEGORY = 10000
@@ -114,10 +118,10 @@ def main():
                 trail_urls = get_trails_urls(category, (i, i+BATCH_SIZE))
                 for trail_id in trail_urls.keys():
                     url = trail_urls[trail_id][1]
+                    # TODO: add try/except TimeoutError for get_trail()
                     trail_data = get_trail(url)
                     extracted_trails_counter += 1
                     # for now print data to screen
-
                     print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
                     print(f'\nextracted so far: {extracted_trails_counter}')
                     print('---------------------------------------------\n')
