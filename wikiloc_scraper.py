@@ -2,10 +2,13 @@ from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
 from helperfunctions import parse_range_list
 from trail_scraper import get_trail
+import argparse
 
 
 MAX_TRAILS_PER_PAGE = 25
 MAX_TRAILS_IN_CATEGORY = 10000
+DEFAULT_CATEGORY_NAME = 'Hiking'
+DEFAULT_TRAIL_RANGE = '0-100'
 
 
 def get_trail_categories():
@@ -47,24 +50,46 @@ def get_trails_urls(category_url, from_trail=0, to_trail=50):
     return trails_dict
 
 
+def get_parser(category_names):
+    """
+    an argument parser to parse arguments: -C category -c category number(s)
+    :return:
+    """
+
+    parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
+    parser.add_argument('-c', '--cat_int', type=int, choices=range(0, len(category_names)+1),
+                        metavar="category to scrape int", help=f"{{{'choose by number' + ' ; '.join(category_names)}}}")
+    parser.add_argument('-C', '--cat_str', choices={tuple(name for name in category_names)},
+                        metavar="category to scrape string", help=f"{{{'choose by name' + ' ; '.join(category_names)}}}")
+    parser.add_argument('-r', type=str, help="comma separated ranges [0-10000]",
+                        metavar='trails range')
+    return parser
+
+
 def main():
     # get all category names and urls:
     categories_list = get_trail_categories()
     category_names = [f"[{str(i)}] {cat[0]}" for i, cat in enumerate(categories_list)]
-    print('\n'.join(category_names))
+    # print('\n'.join(category_names))
 
-    cat_to_scrape = input('Please select a category (number) to scrape: ')
+    args = get_parser(category_names).parse_args()
 
-    while not cat_to_scrape.isdigit() or int(cat_to_scrape) < 0:
-        cat_to_scrape = input('Please select a category (number) to scrape: ')
-    cat_to_scrape=int(cat_to_scrape)
+    if args.cat_int:
+        cat_to_scrape = args.cat_int
+    elif args.cat_str:
+        cat_to_scrape = [cat[0] for cat in categories_list].index(args.cat_str)
+        if cat_to_scrape == -1:
+            cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
+    else:
+        cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
+
     ## loop through a category to extract all the trails in it starting from the latest
     trails_to_scrape = ['empty']
-
     try:
-        range_list = input("Please enter a range of trails to scrape "
-                           "in comma separated ranges , max is 10000 are: ")
-        range_list = parse_range_list(range_list)
+        if args.r:
+            range_list = parse_range_list(args.r)
+        else:
+            parse_range_list(DEFAULT_TRAIL_RANGE)
     except ValueError:
         print(ValueError)
         return
@@ -77,15 +102,7 @@ def main():
         trails_dictionary[trail_id] = get_trail(trails_dictionary[trail_id][1])
 
     for trail_id in trails_dictionary.keys():
-        # for tag in ['Time', 'Moving time', 'Uploaded', 'Recorded']:
-        #     if tag in trails_dictionary[trail_id]:
-        #         print(trails_dictionary[trail_id][tag][0])
         print(trails_dictionary[trail_id])
-
-    # print(len(trails_dictionary.keys()))
-    # print('\n'.join([f'{key} : {value[0]} - {value[1]}' for key, value in trails_dictionary.items()]))
-    # print(get_trail_categories())
-    # pass
 
 
 # def test():

@@ -7,6 +7,10 @@ MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june':
           'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
           1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12
           }
+FEET_TO_METER = 0.3048
+MILES_TO_KM = 1.6093
+HOURS_IN_DAY = 24
+MINUTES_IN_HOUR = 60
 
 
 def get_trail(trail_page_url):
@@ -18,7 +22,7 @@ def get_trail(trail_page_url):
     trail_page = get_page(trail_page_url)
     trail_data = extract_trail_data(trail_page)
     trail_data, units = convert_values(trail_data)
-    return trail_data
+    return trail_data, units
 
 
 def extract_trail_data(trail_page):
@@ -115,7 +119,9 @@ def convert_values(trail_data):
         elif attribute in time_attributes:
             total_time_minutes = 0
             # (regex, multiplier to minutes)
-            for regex, multiplier in [(r"([\d]*) days", 24 * 60), (r"([\d]*) hour", 60), (r"([\d]*) minute", 1)]:
+            for regex, multiplier in [(r"([\d]*) days", HOURS_IN_DAY * MINUTES_IN_HOUR),
+                                      (r"([\d]*) hour", MINUTES_IN_HOUR),
+                                      (r"([\d]*) minute", 1)]:
                 match = re.search(regex, value[0].replace('one', '1'))
                 if match:
                     total_time_minutes += int(match.groups()[0]) * multiplier

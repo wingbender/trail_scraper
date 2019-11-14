@@ -10,9 +10,6 @@ def parse_range_list(rl):
         return int(parts[0]), int(parts[-1])
     a = []
     return list(map(parse_range, rl.split(',')))
-    # for rng in list(map(parse_range, rl.split(','))):
-    #     a = a+list(rng)
-    # return sorted(set(a))
 
 
 def test():
