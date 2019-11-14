@@ -17,7 +17,7 @@ def get_trail(trail_page_url):
     """
     trail_page = get_page(trail_page_url)
     trail_data = extract_trail_data(trail_page)
-    trail_data = convert_values(trail_data)
+    trail_data, units = convert_values(trail_data)
     return trail_data
 
 
@@ -32,21 +32,21 @@ def extract_trail_data(trail_page):
     trail_id = int(str.rsplit(trail_page.url, '-', 1)[1])
     trail_soup = bs(trail_page.content, 'html.parser')
     trail_data = {}
-    trail_data['id'] = [trail_id, None]  # add 2nd item of None for unit field in dictionary. same for other unitless attributes
-    trail_data['title'] = [trail_soup.find('h1').text.strip(), None]
+    trail_data['id'] = trail_id
+    trail_data['title'] = trail_soup.find('h1').text.strip()
     # user name and id
     user_id_container = trail_soup.find('a', attrs={"class": "user-image"})
-    trail_data['user_name'] = [user_id_container['title'], None]
-    trail_data['user_id'] = [int(user_id_container['href'].split('=')[-1]), None]
+    trail_data['user_name'] = user_id_container['title']
+    trail_data['user_id'] = int(user_id_container['href'].split('=')[-1])
     title_container = trail_soup.find('h1')
     # country and trail category
     country_category_container = trail_soup.find('div', attrs={'class':"crumbs display"})
-    trail_data['category'] = [country_category_container.find("strong").text, None]
+    trail_data['category'] = country_category_container.find("strong").text
     country = country_category_container.find("span")
     if country is not None:
-        trail_data['country'] = [country.text.split(' ')[-1], None]
+        trail_data['country'] = country.text.split(' ')[-1]
     else:
-        trail_data['country'] = ['Unknown', None]
+        trail_data['country'] = 'Unknown'
     # get trail data
     trail_data_container = trail_soup.find(id="trail-data")
     for hyperlink in trail_data_container.find_all('a', href=True, title=True):
@@ -82,6 +82,7 @@ def convert_values(trail_data):
      2. numerical values as floats
      3. datetime strings in *** format """
     new_data = {}
+    units_dict = {}
     bool_attributes = ['Ends at start point (loop)']
     numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
                           'Elevation gain downhill', 'Elevation min']
@@ -90,25 +91,26 @@ def convert_values(trail_data):
     id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id']
 
     for attribute, value in trail_data.items():
-        out_value = ['', '']
+
         if attribute in id_attributes:
             out_value = value
+            unit = None
 
-        elif attribute in bool_attributes:
+        elif attribute in bool_attributes:  # convert to bool True/False
             if value[0] == 'Yes':
-                out_value[0] = True
+                out_value = True
             else:
-                out_value[0] = False
-            out_value[1] = 'bool'
+                out_value = False
+            unit = 'bool'
 
         elif attribute in numeric_attributes:  # numerical values as floats and unit conversion
-            out_value[0] = float(value[0].replace(',', ''))
+            out_value = float(value[0].replace(',', ''))
             if value[1] == 'feet':
-                out_value[0] = out_value[0] * 0.3048
-                out_value[1] = 'm'
+                out_value = out_value * 0.3048  # convert to meters
+                unit = 'm'
             elif value[1] == 'miles':
-                out_value[0] = out_value[0] * 1.6093
-                out_value[1] = 'km'
+                out_value = out_value * 1.6093  # convert to km
+                unit = 'km'
 
         elif attribute in time_attributes:
             total_time_minutes = 0
@@ -117,8 +119,8 @@ def convert_values(trail_data):
                 match = re.search(regex, value[0].replace('one', '1'))
                 if match:
                     total_time_minutes += int(match.groups()[0]) * multiplier
-            out_value[0] = total_time_minutes
-            out_value[1] = 'minutes'
+            out_value = total_time_minutes
+            unit = 'minutes'
 
         elif attribute in date_attributes:
             date_string = 'YYYY-MM-DD'
@@ -130,19 +132,23 @@ def convert_values(trail_data):
                         date_string = date_string.replace(part_symbol, '{:02d}'.format(int(match_content)))
                     else:
                         date_string = date_string.replace(part_symbol, str(MONTHS[match_content.lower()]))
-            out_value[0] = date_string.replace('-DD', '')
-            out_value[1] = 'YYYY-MM(-DD)'
+            out_value = date_string.replace('-DD', '')
+            unit = 'YYYY-MM(-DD)'
 
         else:
             continue
 
         new_data[attribute] = out_value
+        units_dict[attribute] = unit
 
     # attributes outside of loop in order to change key name
-    new_data['No of coordinates'] = [int(trail_data['Coordinates'][0]), None]
-    new_data['Technical difficulty'] = list(trail_data['Technical difficulty:'])
+    new_data['No of coordinates'] = int(trail_data['Coordinates'][0])
+    units_dict['No of coordinates'] = None
 
-    return new_data
+    new_data['Technical difficulty'] = trail_data['Technical difficulty:'][0]
+    units_dict['Technical difficulty'] = None
+
+    return new_data, units_dict
 
 def data_test():
     # trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
@@ -159,12 +165,11 @@ def data_test():
     test_page = MakeTestPage(html_data, 'Wikiloc_test_page-1')
 
     trail_data = extract_trail_data(test_page)
-    trail_data = convert_values(trail_data)
-    print('\n'.join([f'{key} : {value[0]} \t {value[1]}' for key, value in trail_data.items()]))
+    trail_data, units = convert_values(trail_data)
+    print('\n'.join([f'{key} : {value} {units[key]},' for key, value in trail_data.items()]))
 
 
 def main():
-
     data_test()
 
 
