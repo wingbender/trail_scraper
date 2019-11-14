@@ -3,17 +3,20 @@ from webfunctions import get_page
 from helperfunctions import parse_range_list
 from trail_scraper import get_trail
 import argparse
+import time
 
 
 MAX_TRAILS_PER_PAGE = 25
 MAX_TRAILS_IN_CATEGORY = 10000
 DEFAULT_CATEGORY_NAME = 'Hiking'
 DEFAULT_TRAIL_RANGE = '0-100'
+TIMEOUT = 60*3  # seconds
+
 UNITS_MASTER = {'id': None, 'title': None, 'user_name': None, 'user_id': None, 'category': None, 'country': None,
                 'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
                 'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
                 'Uploaded': 'YYYY-MM(-DD)', 'Recorded': 'YYYY-MM(-DD)', 'No of coordinates': None,
-                'Moving Time': 'minutes', 'Technical difficulty': None}
+                'Moving time': 'minutes', 'Technical difficulty': None}
 
 def get_trail_categories():
     """
@@ -31,7 +34,7 @@ def get_trail_categories():
     return categories
 
 
-def get_trails_urls(category_url, from_trail=0, to_trail=50):
+def get_trails_urls(categories, ranges):
     """
     scans a category from the last uploaded trails back until reaching max_trails trails
     :param category_url:
@@ -43,14 +46,23 @@ def get_trails_urls(category_url, from_trail=0, to_trail=50):
 
     # TODO: expand the function to extract multiple categories
 
-    # maximum number of trails per page (MAX_TRAILS_PER_PAGE) is determined by wikiloc (25)
-    for i in range(max(0, from_trail), min(to_trail,MAX_TRAILS_IN_CATEGORY), MAX_TRAILS_PER_PAGE):
-        trails_list_url = category_url + f'&s=last&from={i}&to={min(i + MAX_TRAILS_PER_PAGE, to_trail)}'
-        trails_list_html = get_page(trails_list_url)
-        trail_list_soup = bs(trails_list_html.content, 'html.parser')
-        trail_list_container = trail_list_soup.find('ul', class_='trail-list')
-        for trail in trail_list_container.find_all('a', class_='trail-title'):
-            trails_dict[int(trail['href'].rsplit('-', 1)[1])] = (trail.text, trail['href'])
+    for category in categories:
+        print(f'getting urls from category: {category[0]}')
+        extracted_trails = 0
+        for rng in ranges:
+            from_trail = rng[0]
+            to_trail = rng[1]
+            # maximum number of trails per page (MAX_TRAILS_PER_PAGE) is determined by wikiloc (25)
+            for i in range(max(0, from_trail), min(to_trail,MAX_TRAILS_IN_CATEGORY), MAX_TRAILS_PER_PAGE):
+                trails_list_url = category[1] + f'&s=last&from={i}&to={min(i + MAX_TRAILS_PER_PAGE, to_trail)}'
+                trails_list_html = get_page(trails_list_url)
+                trail_list_soup = bs(trails_list_html.content, 'html.parser')
+                trail_list_container = trail_list_soup.find('ul', class_='trail-list')
+                for trail in trail_list_container.find_all('a', class_='trail-title'):
+                    trail_id = int(trail['href'].rsplit('-', 1)[1])
+                    trails_dict[trail_id] = (trail.text, trail['href'])
+                    extracted_trails +=1
+                    print(f'extracted {extracted_trails} from category {category[0]}')
     return trails_dict
 
 
@@ -67,6 +79,8 @@ def get_parser(category_names):
                         metavar="category to scrape string", help=f"{{{'choose by name' + ' ; '.join(category_names)}}}")
     parser.add_argument('-r', type=str, help="comma separated ranges [0-10000]",
                         metavar='trails range')
+    parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
+                        action='store_true')
     return parser
 
 
@@ -78,29 +92,31 @@ def main():
 
     args = get_parser(category_names).parse_args()
 
-    if args.cat_int:
-        cat_to_scrape = args.cat_int
-    elif args.cat_str:
-        cat_to_scrape = [cat[0] for cat in categories_list].index(args.cat_str)
-        if cat_to_scrape == -1:
-            cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
+    if args.extract_all:
+        cat_to_scrape = list(range(1, len(categories_list)))
+        range_list = [(0, 10000)]
     else:
-        cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
-
-    ## loop through a category to extract all the trails in it starting from the latest
-    trails_to_scrape = ['empty']
-    try:
-        if args.r:
-            range_list = parse_range_list(args.r)
+        if args.cat_int:
+            cat_to_scrape = [args.cat_int]
+        elif args.cat_str:
+            cat_to_scrape = [cat[0] for cat in categories_list].index(args.cat_str)
+            if cat_to_scrape == -1:
+                cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
         else:
-            parse_range_list(DEFAULT_TRAIL_RANGE)
-    except ValueError:
-        print(ValueError)
-        return
-    trails_dictionary = dict()
-    for rng in range_list:
-        trails_dictionary.update(get_trails_urls(categories_list[cat_to_scrape][1], from_trail=rng[0], to_trail=rng[1]))
+            cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
 
+        try:
+            if args.r:
+                range_list = parse_range_list(args.r)
+            else:
+                range_list = parse_range_list(DEFAULT_TRAIL_RANGE)
+        except ValueError:
+            print(ValueError)
+            return
+
+    trails_dictionary = get_trails_urls([categories_list[cat] for cat in cat_to_scrape], range_list)
+
+    start_time = time.time()
     for i, trail_id in enumerate(trails_dictionary.keys()):
         print(f'trail #{i+1} of {len(trails_dictionary.keys())}: {trails_dictionary[trail_id][0]}')
         trail_data, units = get_trail(trails_dictionary[trail_id][1])
@@ -116,9 +132,14 @@ def main():
             print(f'Units of trail id {trail_id} do not match the UNIT_MASTER key')
             continue
         trails_dictionary[trail_id] = trail_data
-
-    for trail_id in trails_dictionary.keys():
         print(trails_dictionary[trail_id])
+        if (time.time() - start_time) > TIMEOUT:
+            print(f'Timeout time of {TIMEOUT} seconds reached')
+            break
+
+
+    # for trail_id in trails_dictionary.keys():
+    #     print(trails_dictionary[trail_id])
 
 
 # def test():

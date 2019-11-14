@@ -1,6 +1,11 @@
 
 
 def parse_range_list(rl):
+    """
+    parses a range string e.g. '2-100,230-500' to list of (from_item,to_item) tuples
+    :param rl:
+    :return:
+    """
     def parse_range(r):
         if len(r) == 0:
             return []
