@@ -12,11 +12,7 @@ DEFAULT_CATEGORY_NAME = 'Hiking'
 DEFAULT_TRAIL_RANGE = '0-100'
 TIMEOUT = 60*3  # seconds
 
-UNITS_MASTER = {'id': None, 'title': None, 'user_name': None, 'user_id': None, 'category': None, 'country': None,
-                'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
-                'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
-                'Uploaded': 'YYYY-MM(-DD)', 'Recorded': 'YYYY-MM(-DD)', 'No of coordinates': None,
-                'Moving time': 'minutes', 'Technical difficulty': None}
+
 
 def get_trail_categories():
     """
@@ -119,18 +115,8 @@ def main():
     start_time = time.time()
     for i, trail_id in enumerate(trails_dictionary.keys()):
         print(f'trail #{i+1} of {len(trails_dictionary.keys())}: {trails_dictionary[trail_id][0]}')
-        trail_data, units = get_trail(trails_dictionary[trail_id][1])
-        # check units match between units dict and UNITS master dict
-        units_problem_flag = False
-        for key, value in UNITS_MASTER.items():
-            if key not in units.keys():
-                trail_data[key] = None
-            elif units[key] != UNITS_MASTER[key]:
-                units_problem_flag = True
-                break
-        if units_problem_flag:
-            print(f'Units of trail id {trail_id} do not match the UNIT_MASTER key')
-            continue
+        trail_data = get_trail(trails_dictionary[trail_id][1])
+
         trails_dictionary[trail_id] = trail_data
         print(trails_dictionary[trail_id])
         if (time.time() - start_time) > TIMEOUT:

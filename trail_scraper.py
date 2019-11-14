@@ -11,7 +11,11 @@ FEET_TO_METER = 0.3048
 MILES_TO_KM = 1.6093
 HOURS_IN_DAY = 24
 MINUTES_IN_HOUR = 60
-
+UNITS_MASTER = {'id': None, 'title': None, 'user_name': None, 'user_id': None, 'category': None, 'country': None,
+                'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
+                'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
+                'Uploaded': 'YYYY-MM(-DD)', 'Recorded': 'YYYY-MM(-DD)', 'No of coordinates': None,
+                'Moving time': 'minutes', 'Technical difficulty': None}
 
 def get_trail(trail_page_url):
     """
@@ -22,7 +26,18 @@ def get_trail(trail_page_url):
     trail_page = get_page(trail_page_url)
     trail_data = extract_trail_data(trail_page)
     trail_data, units = convert_values(trail_data)
-    return trail_data, units
+    # check units match between units dict and UNITS master dict
+    units_problem_flag = False
+    for key, value in UNITS_MASTER.items():
+        if key not in units.keys():
+            trail_data[key] = None
+            units[key] = UNITS_MASTER[key]
+        elif units[key] != UNITS_MASTER[key]:
+            units_problem_flag = True
+            break
+    if units_problem_flag:
+        raise ValueError(f"Units of trail id {trail_data['id']} do not match the UNIT_MASTER key")
+    return trail_data
 
 
 def extract_trail_data(trail_page):
@@ -173,6 +188,11 @@ def data_test():
     trail_data = extract_trail_data(test_page)
     trail_data, units = convert_values(trail_data)
     print('\n'.join([f'{key} : {value} {units[key]},' for key, value in trail_data.items()]))
+    print()
+
+    # check if raises ValueError in get_trail() in case of units mismatch - changed UNITS_MASTER just for this
+    trail_data = get_trail("https://www.wikiloc.com/splitboard-trails/finsteraahorn-24124650")
+    print('\n'.join([f'{key} : {value},' for key, value in trail_data.items()]))
 
 
 def main():
