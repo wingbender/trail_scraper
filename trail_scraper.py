@@ -1,3 +1,9 @@
+""" Functions to scrape trail data from a trail page in the website wikiloc.com
+    -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project
+
+    The main function get_trail() is called from wikiloc_scraper.py for a specific web page
+    and returns trail_data dictionary """
+
 from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
 import re
@@ -5,12 +11,12 @@ import re
 MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8,
           'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
           'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
-          1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12
-          }
+          1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
 FEET_TO_METER = 0.3048
 MILES_TO_KM = 1.6093
 HOURS_IN_DAY = 24
 MINUTES_IN_HOUR = 60
+# List of the attributes extracted per trail and their units
 UNITS_MASTER = {'id': None, 'title': None, 'user_name': None, 'user_id': None, 'category': None, 'country': None,
                 'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
                 'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
@@ -19,14 +25,15 @@ UNITS_MASTER = {'id': None, 'title': None, 'user_name': None, 'user_id': None, '
 
 def get_trail(trail_page_url):
     """
-    extract the trail data from it's page
+    This function requests the web page, parses and extracts the trail data from the html, converts units and returns
+    trail_data dictionary.
     :param trail_page_url:
     :return: dict trail_data
     """
     trail_page = get_page(trail_page_url)
     trail_data = extract_trail_data(trail_page)
     trail_data, units = convert_values(trail_data)
-    # check units match between units dict and UNITS master dict
+    # check units match between units dict and UNITS master dict and raises ValueError if a mismatch is found
     units_problem_flag = False
     for key, value in UNITS_MASTER.items():
         if key not in units.keys():
@@ -42,15 +49,15 @@ def get_trail(trail_page_url):
 
 def extract_trail_data(trail_page):
     """
-    extracts the trail details from an HTML string.
+    Extracts the trail details from an HTML string.
     returns trail_data dictionary where trail_data.keys() are the trail attributes and the values are
-    tuples of numeric value and measurement units
+    tuples of numeric value and measurement units.
     :param trail_page (text)
-    :return: trail_data (dict)
+    :return: trail_data (dictionary)
     """
     trail_id = int(str.rsplit(trail_page.url, '-', 1)[1])
     trail_soup = bs(trail_page.content, 'html.parser')
-    trail_data = {}
+    trail_data = dict()
     trail_data['id'] = trail_id
     trail_data['title'] = trail_soup.find('h1').text.strip()
     # user name and id
@@ -79,9 +86,9 @@ def extract_trail_data(trail_page):
 
 def process_trail_data_string(raw_data_string):
     """
-    returns data tuple (attribute, value, units)
+    Function to parse trail data string into attributes, values and their units
     :param raw_data_string:
-    :return:
+    :return:data tuple (attribute, value, units)
     """
     data_list = raw_data_string.split('\xa0')
     if len(data_list) == 2:
@@ -96,12 +103,13 @@ def process_trail_data_string(raw_data_string):
 
 
 def convert_values(trail_data):
-    """ Function takes trail_data dictionary and returns corrected entries:
-     1. No / Yes -> bool True / False
-     2. numerical values as floats
-     3. datetime strings in *** format """
+    """ Function takes trail_data dictionary, converts values to desired units and string formats, and returns
+    new_data dictionary with the values and a separate units dictionary.
+    :param trail_data dictionary
+    :return new_data dictionary, units dictionary """
     new_data = {}
     units_dict = {}
+    # Division of attributes to different handling cases
     bool_attributes = ['Ends at start point (loop)']
     numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
                           'Elevation gain downhill', 'Elevation min']
@@ -171,9 +179,10 @@ def convert_values(trail_data):
 
     return new_data, units_dict
 
-def data_test():
+
+def offline_data_test():
+    """ Function to test data extraction from an offline web page already downloaded from wikiloc.com """
     # trail_path = 'https://www.wikiloc.com/hiking-trails/hexel-43199206'
-    # trail_id, trail_data = get_trail(trail_path)
     with open('Wikiloc_test_page.html', 'r', encoding='utf-8') as html_page:
         html_data = html_page.read()
 
@@ -183,20 +192,25 @@ def data_test():
             self.content = content
             self.url = url
 
-    test_page = MakeTestPage(html_data, 'Wikiloc_test_page-1')
+    test_page = MakeTestPage(html_data, 'Wikiloc_test_page-43199206')  # added trail id to fake URL
 
     trail_data = extract_trail_data(test_page)
     trail_data, units = convert_values(trail_data)
     print('\n'.join([f'{key} : {value} {units[key]},' for key, value in trail_data.items()]))
-    print()
 
-    # check if raises ValueError in get_trail() in case of units mismatch - changed UNITS_MASTER just for this
+
+def online_data_test():
+    """ Function to test online extraction of trail data from a trail page on wikiloc.com"""
     trail_data = get_trail("https://www.wikiloc.com/splitboard-trails/finsteraahorn-24124650")
     print('\n'.join([f'{key} : {value},' for key, value in trail_data.items()]))
 
+    # check if raises ValueError in get_trail() in case of units mismatch - changed UNITS_MASTER just for this
+
 
 def main():
-    data_test()
+    offline_data_test()
+    print()
+    online_data_test()
 
 
 if __name__ == '__main__':
