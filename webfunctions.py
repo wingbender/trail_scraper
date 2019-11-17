@@ -1,3 +1,8 @@
+""" Functions to request and download trail page in the website wikiloc.com
+    -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project
+
+    The function get_page() is called by get_trail() in the file trail_scraper.py """
+
 import requests
 
 
