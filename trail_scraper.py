@@ -23,6 +23,7 @@ UNITS_MASTER = {'id': None, 'title': None, 'user_name': None, 'user_id': None, '
                 'Uploaded': 'YYYY-MM(-DD)', 'Recorded': 'YYYY-MM(-DD)', 'No of coordinates': None,
                 'Moving time': 'minutes', 'Technical difficulty': None}
 
+
 def get_trail(trail_page_url):
     """
     This function requests the web page, parses and extracts the trail data from the html, converts units and returns
@@ -64,7 +65,6 @@ def extract_trail_data(trail_page):
     user_id_container = trail_soup.find('a', attrs={"class": "user-image"})
     trail_data['user_name'] = user_id_container['title']
     trail_data['user_id'] = int(user_id_container['href'].split('=')[-1])
-    title_container = trail_soup.find('h1')
     # country and trail category
     country_category_container = trail_soup.find('div', attrs={'class': "crumbs display"})
     trail_data['category'] = country_category_container.find("strong").text

@@ -1,3 +1,19 @@
+""" entry point for wikiloc scraper to scrape trail data from wikiloc.com
+    -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project
+
+    The main function runs with command line arguments to scrape a range of files from a single category
+    or loops through all the categories to scrape the entire site.
+
+    command line arguments are:
+
+    [-h] : show help message
+    [-c category to scrape int]: category to scrape by number
+    [-C category to scrape string]: category to scrape by name
+    [-r trails range]: range of trails to scrape e.g.: '14-76'
+    [-FF]: scrape the entire site. if this flag is passed all others will be ignored
+    """
+
+import requests
 from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
 from helperfunctions import parse_range_list
@@ -5,17 +21,20 @@ from trail_scraper import get_trail
 import argparse
 import time
 
-# TODO: handle exceptions
 # TODO: add logging
 # TODO: add testing
-# TODO: improve documentation and commenting
+
 
 MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
 MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
 DEFAULT_CATEGORY_NAME = 'Hiking'  # Most interesting category for us right now, can be changed without any issue
 DEFAULT_TRAIL_RANGE = '0-100'  # Taking the first 100 trails by default
-TIMEOUT = 60*3  # Timeout for the trail extraction operation
+# TIMEOUT = 60*3  # Timeout for the trail extraction operation
 BATCH_SIZE = MAX_TRAILS_PER_PAGE  # The batch of URLs to extract before starting to extract each trail
+MAX_TIMEOUTS = 30   # Max timeouts while extracting trails. if this number is reached,
+                    # something is probably wrong and we should check it
+MAX_HTTP_ERRORS = 30     # Max http errors while extracting trails. if this number is reached,
+                           # something is probably wrong and we should check it
 
 
 def get_trail_categories():
@@ -37,9 +56,8 @@ def get_trail_categories():
 def get_trails_urls(category, range_limits):
     """
     scans a category from the last uploaded trails back until reaching max_trails trails
-    :param category_tuple, 2nd entry url:
-    :param range_limits tuple (from_trail, to_trail):
-
+    :param category: [tuple], 2nd entry url
+    :param range_limits: [tuple] (from_trail, to_trail)
     :return: dict {trail_id : (trail_name, trail_url)}
     """
     # maximum number of trails per page (MAX_TRAILS_PER_PAGE) is determined by wikiloc (25)
@@ -101,21 +119,30 @@ def main():
             else:
                 range_list = parse_range_list(DEFAULT_TRAIL_RANGE)[0]
         except ValueError:
+            print('Could not parse your requested range, please use numbers and dashes: "2-86" ')
             print(ValueError)
             return
 
     # get the category tuples from indexes
-    categories_to_scrape = [categories_list[cat] for cat in cat_to_scrape]
+    try:
+        categories_to_scrape = [categories_list[cat] for cat in cat_to_scrape]
+    except requests.HTTPError:
+        print('HTTP error while processing categories, exiting...')
+        return
+
+    except TimeoutError:
+        print('Timeout error while processing categories, exiting...')
+        return
 
     extracted_trails_counter = 0
     start_time = time.time()
-    try:
-        for category in categories_to_scrape:
-            print(f'getting urls from category: {category[0]}')
+    for category in categories_to_scrape:
+        print(f'getting urls from category: {category[0]}')
 
-            for i in range(range_list[0], range_list[1], BATCH_SIZE):
-                trail_urls = get_trails_urls(category, (i, i+BATCH_SIZE))
-                for trail_id in trail_urls.keys():
+        for i in range(range_list[0], range_list[1], BATCH_SIZE):
+            trail_urls = get_trails_urls(category, (i, min(i+BATCH_SIZE,range_list[1])))
+            for trail_id in trail_urls.keys():
+                try:
                     url = trail_urls[trail_id][1]
                     # TODO: add try/except TimeoutError for get_trail()
                     trail_data = get_trail(url)
@@ -125,10 +152,38 @@ def main():
                     print(f'\nextracted so far: {extracted_trails_counter}')
                     print('---------------------------------------------\n')
                     # TODO: here add where to save data
-                    if (time.time() - start_time) > TIMEOUT:
-                        raise TimeoutError
-    except TimeoutError:
-        print(f'Process timed out, extracted {extracted_trails_counter} trails')
+
+                except ValueError as ve:
+                    print(f'Value error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
+                    print(ve)
+                    print(f'skipping trail')
+
+                except TimeoutError as te:
+                    print(f'Value error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
+                    print(te)
+                    if 'trail_timeouts' in vars():
+                        trail_timeouts += 1
+                        if trail_timeouts >= MAX_TIMEOUTS:
+                            print('Maximum number of timeouts reached, check your internet connection and try again')
+                            return
+                    else:
+                        trail_timeouts = 1
+                except requests.HTTPError as e:
+                    print(f'HTTP error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
+                    print(e)
+                    if 'trail_http_errors' in vars():
+                        trail_http_errors += 1
+                        if trail_http_errors >= MAX_HTTP_ERRORS:
+                            print('Maximum number of trail http errors reached, check the site and try again')
+                            return
+                    else:
+                        trail_http_errors = 1
+                #TODO: add global timeout if needed (maybe debugging?
+
+                # if (time.time() - start_time) > TIMEOUT:
+                #     print('Timed out while scraping the site. consider using a faster connection '
+                #           'or extending the timeout limit')
+                #     return
 
 
 if __name__ == '__main__':
