@@ -33,7 +33,7 @@ DEFAULT_TRAIL_RANGE = '0-100'  # Taking the first 100 trails by default
 BATCH_SIZE = MAX_TRAILS_PER_PAGE  # The batch of URLs to extract before starting to extract each trail
 MAX_TIMEOUTS = 30   # Max timeouts while extracting trails. if this number is reached,
                     # something is probably wrong and we should check it
-MAX_HTTP_ERRORS = 30     # Max http errors while extracting trails. if this number is reached,
+MAX_HTTP_ERRORS = 5     # Max http errors while extracting trails. if this number is reached,
                            # something is probably wrong and we should check it
 
 
