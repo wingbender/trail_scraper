@@ -10,13 +10,12 @@ import time
 # TODO: add testing
 # TODO: improve documentation and commenting
 
-MAX_TRAILS_PER_PAGE = 25
-MAX_TRAILS_IN_CATEGORY = 10000
-DEFAULT_CATEGORY_NAME = 'Hiking'
-DEFAULT_TRAIL_RANGE = '0-100'
-TIMEOUT = 60*3  # seconds
-BATCH_SIZE = MAX_TRAILS_PER_PAGE
-
+MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
+MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
+DEFAULT_CATEGORY_NAME = 'Hiking'  # Most interesting category for us right now, can be changed without any issue
+DEFAULT_TRAIL_RANGE = '0-100'  # Taking the first 100 trails by default
+TIMEOUT = 60*3  # Timeout for the trail extraction operation
+BATCH_SIZE = MAX_TRAILS_PER_PAGE  # The batch of URLs to extract before starting to extract each trail
 
 
 def get_trail_categories():
