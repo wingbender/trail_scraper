@@ -23,7 +23,7 @@ import time
 
 # TODO: add logging
 # TODO: add testing
-
+# TODO: add to command line interface option to run nonstop on specific category
 
 MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
 MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
@@ -140,7 +140,7 @@ def main():
         print(f'getting urls from category: {category[0]}')
 
         for i in range(range_list[0], range_list[1], BATCH_SIZE):
-            trail_urls = get_trails_urls(category, (i, min(i+BATCH_SIZE,range_list[1])))
+            trail_urls = get_trails_urls(category, (i, min(i+BATCH_SIZE, range_list[1])))
             for trail_id in trail_urls.keys():
                 try:
                     url = trail_urls[trail_id][1]

@@ -12,15 +12,14 @@ MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june':
           'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
           'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
           1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
-FEET_TO_METER = 0.3048
-MILES_TO_KM = 1.6093
+CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852, 'km']}
 HOURS_IN_DAY = 24
 MINUTES_IN_HOUR = 60
 # List of the attributes extracted per trail and their units
-UNITS_MASTER = {'id': None, 'title': None, 'user_name': None, 'user_id': None, 'category': None, 'country': None,
-                'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
+UNITS_MASTER = {'id': None, 'title': None, 'url': None, 'user_name': None, 'user_id': None, 'category': None,
+                'country': None, 'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
                 'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
-                'Uploaded': 'YYYY-MM(-DD)', 'Recorded': 'YYYY-MM(-DD)', 'No of coordinates': None,
+                'Uploaded': 'YYYY-MM-DD', 'Recorded': 'YYYY-MM-DD', 'No of coordinates': None,
                 'Moving time': 'minutes', 'Technical difficulty': None}
 
 def get_trail(trail_page_url):
@@ -60,6 +59,7 @@ def extract_trail_data(trail_page):
     trail_data = dict()
     trail_data['id'] = trail_id
     trail_data['title'] = trail_soup.find('h1').text.strip()
+    trail_data['url'] = trail_page.url
     # user name and id
     user_id_container = trail_soup.find('a', attrs={"class": "user-image"})
     trail_data['user_name'] = user_id_container['title']
@@ -115,7 +115,7 @@ def convert_values(trail_data):
                           'Elevation gain downhill', 'Elevation min']
     time_attributes = ['Time', 'Moving time']
     date_attributes = ['Uploaded', 'Recorded']
-    id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id']
+    id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id', 'url']
 
     for attribute, value in trail_data.items():
 
@@ -132,12 +132,11 @@ def convert_values(trail_data):
 
         elif attribute in numeric_attributes:  # numerical values as floats and unit conversion
             out_value = float(value[0].replace(',', ''))
-            if value[1] == 'feet':
-                out_value = out_value * 0.3048  # convert to meters
-                unit = 'm'
-            elif value[1] == 'miles':
-                out_value = out_value * 1.6093  # convert to km
-                unit = 'km'
+            if value[1] in CONVERSION_DICT.keys():
+                out_value = out_value * CONVERSION_DICT[value[1]][0]
+                unit = CONVERSION_DICT[value[1]][1]
+            elif value[1] not in ['m', 'km']:
+                print(f'Unit {value[1]} unrecognized!')
 
         elif attribute in time_attributes:
             total_time_minutes = 0
@@ -161,8 +160,8 @@ def convert_values(trail_data):
                         date_string = date_string.replace(part_symbol, '{:02d}'.format(int(match_content)))
                     else:
                         date_string = date_string.replace(part_symbol, str(MONTHS[match_content.lower()]))
-            out_value = date_string.replace('-DD', '')
-            unit = 'YYYY-MM(-DD)'
+            out_value = date_string.replace('-DD', '-01')  # if given only month, auto fill day as 1st
+            unit = 'YYYY-MM-DD'
 
         else:
             continue
