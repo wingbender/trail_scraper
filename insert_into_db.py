@@ -12,5 +12,6 @@ def insert_into_db(trail_data):
         # TODO: create execute statements for trail_data and insert into trails, categories, and users
         # TODO: convert difficulty to integer rank
         # TODO: make sure to skip over duplicates / existing trails
+        # TODO: add our own id index
         cur.execute("INSERT INTO trails () \
                                 VALUES (?, ?, ?, ?, ?)", [])
