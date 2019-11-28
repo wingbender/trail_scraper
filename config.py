@@ -1,3 +1,9 @@
+"""
+    Global constants used through the program
+    -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project
+"""
+
+
 MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
 MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
 DEFAULT_CATEGORY_NAME = 'Hiking'  # Most interesting category for us right now, can be changed without any issue
