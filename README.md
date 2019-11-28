@@ -15,11 +15,11 @@ You'll need python 3.6 with "requests", "BeautifulSoup" and "re" to run this fun
 ## Using the program
 after downloading, run wikiloc_scraper.py with the following command line arguments:
 
-[-h] : show help message
-[-c category to scrape int]: category to scrape by number
-[-C category to scrape string]: category to scrape by name
-[-r trails range]: range of trails to scrape e.g.: '14-76'
-[-FF]: scrape the entire site. if this flag is passed all others will be ignored
+[-h] : show help message  
+[-c category to scrape int]: category to scrape by number  
+[-C category to scrape string]: category to scrape by name  
+[-r trails range]: range of trails to scrape e.g.: '14-76'  
+[-FF]: scrape the entire site. if this flag is passed all others will be ignored  
 
 
 for example: 
