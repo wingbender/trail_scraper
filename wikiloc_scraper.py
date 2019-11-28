@@ -133,20 +133,8 @@ def main():
     args = get_parser(categories_list).parse_args()
     cat_to_scrape, range_list = parse_handler(args)
 
-
-    # get the category tuples from indexes
-    try:
-        categories_to_scrape = [categories_list[cat] for cat in cat_to_scrape]
-    except requests.HTTPError:
-        print('HTTP error while processing categories, exiting...')
-        return
-
-    except TimeoutError:
-        print('Timeout error while processing categories, exiting...')
-        return
-
     extracted_trails_counter = 0
-    for category in categories_to_scrape:
+    for category in cat_to_scrape:
         print(f'getting urls from category: {category[0]}')
         for i in range(range_list[0], range_list[1], cfg.BATCH_SIZE):
             trail_urls = get_trails_urls(category, (i, min(i+cfg.BATCH_SIZE, range_list[1])))
