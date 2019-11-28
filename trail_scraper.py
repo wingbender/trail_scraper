@@ -47,8 +47,6 @@ def extract_trail_data(trail_page):
     country = country_category_container.find("span")
     if country is not None:
         trail_data['country'] = country.text.split(' ')[-1]
-    else:
-        trail_data['country'] = 'Unknown'
     # get trail data
     trail_data_container = trail_soup.find(id="trail-data")
     for hyperlink in trail_data_container.find_all('a', href=True, title=True):
