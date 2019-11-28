@@ -31,18 +31,7 @@ def get_trail(trail_page_url):
     """
     trail_page = get_page(trail_page_url)
     trail_data = extract_trail_data(trail_page)
-    trail_data, units = convert_values(trail_data)
-    # check units match between units dict and UNITS master dict and raises ValueError if a mismatch is found
-    units_problem_flag = False
-    for key, value in UNITS_MASTER.items():
-        if key not in units.keys():
-            trail_data[key] = None
-            units[key] = UNITS_MASTER[key]
-        elif units[key] != UNITS_MASTER[key]:
-            units_problem_flag = True
-            break
-    if units_problem_flag:
-        raise ValueError(f"Units of trail id {trail_data['id']} do not match the UNIT_MASTER key")
+    trail_data = convert_values(trail_data)
     return trail_data
 
 
@@ -108,7 +97,6 @@ def convert_values(trail_data):
     :param trail_data dictionary
     :return new_data dictionary, units dictionary """
     new_data = {}
-    units_dict = {}
     # Division of attributes to different handling cases
     bool_attributes = ['Ends at start point (loop)']
     numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
@@ -121,23 +109,20 @@ def convert_values(trail_data):
 
         if attribute in id_attributes:
             out_value = value
-            unit = None
 
         elif attribute in bool_attributes:  # convert to bool True/False
             if value[0] == 'Yes':
                 out_value = True
             else:
                 out_value = False
-            unit = 'bool'
 
         elif attribute in numeric_attributes:  # numerical values as floats and unit conversion
             out_value = float(value[0].replace(',', ''))
             if value[1] in CONVERSION_DICT.keys():
                 out_value = out_value * CONVERSION_DICT[value[1]][0]
-                unit = CONVERSION_DICT[value[1]][1]
             elif value[1] not in ['m', 'km']:
-                print(f'Unit {value[1]} unrecognized!')
-
+                raise ValueError(f"Units of trail id {trail_data['id']} do not match the UNIT_MASTER key\n"
+                                 f"Unit {value[1]} unrecognized!")
         elif attribute in time_attributes:
             total_time_minutes = 0
             # (regex, multiplier to minutes)
@@ -148,7 +133,6 @@ def convert_values(trail_data):
                 if match:
                     total_time_minutes += int(match.groups()[0]) * multiplier
             out_value = total_time_minutes
-            unit = 'minutes'
 
         elif attribute in date_attributes:
             date_string = 'YYYY-MM-DD'
@@ -161,22 +145,17 @@ def convert_values(trail_data):
                     else:
                         date_string = date_string.replace(part_symbol, str(MONTHS[match_content.lower()]))
             out_value = date_string.replace('-DD', '-01')  # if given only month, auto fill day as 1st
-            unit = 'YYYY-MM-DD'
 
         else:
             continue
 
         new_data[attribute] = out_value
-        units_dict[attribute] = unit
 
     # attributes outside of loop in order to change key name
     new_data['No of coordinates'] = int(trail_data['Coordinates'][0])
-    units_dict['No of coordinates'] = None
-
     new_data['Technical difficulty'] = trail_data['Technical difficulty:'][0]
-    units_dict['Technical difficulty'] = None
 
-    return new_data, units_dict
+    return new_data
 
 
 def offline_data_test():
@@ -194,14 +173,14 @@ def offline_data_test():
     test_page = MakeTestPage(html_data, 'Wikiloc_test_page-43199206')  # added trail id to fake URL
 
     trail_data = extract_trail_data(test_page)
-    trail_data, units = convert_values(trail_data)
-    print('\n'.join([f'{key} : {value} {units[key]},' for key, value in trail_data.items()]))
+    trail_data = convert_values(trail_data)
+    print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
 
 
 def online_data_test():
     """ Function to test online extraction of trail data from a trail page on wikiloc.com"""
     trail_data = get_trail("https://www.wikiloc.com/splitboard-trails/finsteraahorn-24124650")
-    print('\n'.join([f'{key} : {value},' for key, value in trail_data.items()]))
+    print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
 
     # check if raises ValueError in get_trail() in case of units mismatch - changed UNITS_MASTER just for this
 
