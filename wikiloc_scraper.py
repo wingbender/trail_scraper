@@ -40,7 +40,7 @@ MAX_HTTP_ERRORS = 5     # Max http errors while extracting trails. if this numbe
 def get_trail_categories():
     """
     extracts the categories names and urls from https://www.wikiloc.com/trails
-    :return: dictionary category:url
+    :return: dictionary {category: url}
     """
     root_path = 'https://www.wikiloc.com/trails'
     root_html_string = get_page(root_path)
@@ -50,6 +50,7 @@ def get_trail_categories():
     categories = [('all', '')]
     for i, activity in enumerate(activities):
         categories.append((activity.text[:-len(' trails')], activity['href']))
+
     return categories
 
 
@@ -74,36 +75,30 @@ def get_trails_urls(category, range_limits):
     return trails_url_dict
 
 
-def get_parser(category_names):
+def get_parser(categories_list):
     """
     an argument parser to parse arguments: -C category -c category number(s)
     :return:
     """
+    category_names = [f"[{str(i)}] {cat[0]}" for i, cat in enumerate(categories_list)]
+
     # TODO: Make argument parser return help if no arguments are passed
     parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
     parser.add_argument('-c', '--cat_int', type=int, choices=range(0, len(category_names)+1),
                         metavar="category to scrape int", help=f"{{{'choose by number' + ' ; '.join(category_names)}}}")
     parser.add_argument('-C', '--cat_str', choices={tuple(name for name in category_names)},
                         metavar="category to scrape string", help=f"{{{'choose by name' + ' ; '.join(category_names)}}}")
+    parser.add_argument('--country', metavar="country to scrape", help="choose by country name")  # TODO: make country arg work
     parser.add_argument('-r', type=str, help="comma separated ranges [0-10000]",
                         metavar='trails range')
     parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
                         action='store_true')
     return parser
 
-
-def main():
-    # TODO: simplify main, maybe implement classes
-
-    # get all category names and urls:
-    categories_list = get_trail_categories()
-    category_names = [f"[{str(i)}] {cat[0]}" for i, cat in enumerate(categories_list)]
-    # print('\n'.join(category_names))
-
-    args = get_parser(category_names).parse_args()
-
+def parse_handler(args):
+    """ Function to handle the argument parser results """
     if args.extract_all:
-        cat_to_scrape = list(range(1, len(categories_list)))
+        cat_to_scrape = CATEGORIES.values()
         range_list = (0, 10000)
     else:
         if args.cat_int:
@@ -124,6 +119,15 @@ def main():
             print('Could not parse your requested range, please use numbers and dashes: "2-86" ')
             print(ValueError)
             return
+
+def main():
+    # TODO: simplify main, maybe implement classes
+
+    # get all category names and urls:
+    categories_list = get_trail_categories()
+    args = get_parser(categories_list).parse_args()
+
+
 
     # get the category tuples from indexes
     try:

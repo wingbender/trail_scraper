@@ -11,10 +11,13 @@ def parse_range_list(rl):
     def parse_range(r):
         if len(r) == 0:
             return []
-        parts = r.split("-")
+        elif len(r) == 1:  # if given 1 value, take range from 0->value
+            return 0, r
+        elif len(r) == 2:
+            parts = r.split("-")
+            return int(parts[0]), int(parts[-1])
         if len(parts) > 2:
             raise ValueError("Invalid range: {}".format(r))
-        return int(parts[0]), int(parts[-1])
 
     return list(map(parse_range, rl.split(',')))
 
