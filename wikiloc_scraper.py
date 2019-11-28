@@ -16,7 +16,6 @@
 import requests
 from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
-from helperfunctions import parse_range_list
 from trail_scraper import get_trail
 import argparse
 import config as cfg
@@ -86,18 +85,20 @@ def get_parser(categories_list):
     return parser
 
 def parse_handler(args):
-    """ Function to handle the argument parser results """
+    """ Function to handle the argument parser results
+    :return: cat_to_scrape = list of category tuples of (name, url), range_list = tuple of range limits
+    """
     if args.extract_all:
-        cat_to_scrape = CATEGORIES.keys()
+        cat_to_scrape = cfg.CATEGORIES.values()
         range_list = (0, 10000)
     else:
         if args.cat_int:
-            cat_to_scrape = [args.cat_int]
+            cat_to_scrape = cfg.CATEGORIES[args.cat_int]
         elif args.cat_str:
-
-            cat_to_scrape = CATEGORIES[list(CATEGORIES.values()).index(args.cat_str)]
+            cat_indices = [name for name, url in cfg.CATEGORIES.values()].index(args.cat_str)
+            cat_to_scrape = cfg.CATEGORIES[cat_indices]
         else:
-            cat_to_scrape = 2  # scrape HIKING category by default
+            cat_to_scrape = cfg.CATEGORIES[2]  # scrape HIKING category by default
 
         try:
             if args.r:
@@ -105,10 +106,11 @@ def parse_handler(args):
             else:
                 range_list = parse_range(cfg.DEFAULT_TRAIL_RANGE)
         except ValueError:
-            print('Could not parse your requested range, please use numbers and dashes: "2-86" ')
+            print('Could not parse your requested range, please use numbers and dashes: e.g. "2-86" ')
             print(ValueError)
             return
 
+    return cat_to_scrape, range_list
 
 def parse_range(r):
     """ Function to parse range list string. e.g. "1-10" -> return tuple (0, 100)"""
@@ -129,7 +131,7 @@ def main():
     # get all category names and urls:
     categories_list = get_trail_categories()
     args = get_parser(categories_list).parse_args()
-
+    cat_to_scrape, range_list = parse_handler(args)
 
 
     # get the category tuples from indexes
