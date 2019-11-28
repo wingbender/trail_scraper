@@ -19,6 +19,7 @@ from webfunctions import get_page
 from trail_scraper import get_trail
 import argparse
 import config as cfg
+import sys
 import time
 
 # TODO: add logging
@@ -46,7 +47,7 @@ def get_trail_categories():
 def get_trails_urls(category, range_limits):
     """
     scans a category from the last uploaded trails back until reaching max_trails trails
-    :param category: [tuple], 2nd entry url
+    :param category: [tuple], 1st entry category name, 2nd entry url
     :param range_limits: [tuple] (from_trail, to_trail)
     :return: dict {trail_id : (trail_name, trail_url)}
     """
@@ -64,22 +65,24 @@ def get_trails_urls(category, range_limits):
     return trails_url_dict
 
 
-def get_parser(categories_list):
+def get_parser():
     """
     an argument parser to parse arguments: -C category -c category number(s)
     :return:
     """
-    category_names = [f"[{str(i)}] {cat[0]}" for i, cat in enumerate(categories_list)]
-
-    # TODO: Make argument parser return help if no arguments are passed
     parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
-    parser.add_argument('-c', '--cat_int', type=int, choices=range(0, len(category_names)+1),
-                        metavar="category to scrape int", help=f"{{{'choose by number' + ' ; '.join(category_names)}}}")
-    parser.add_argument('-C', '--cat_str', choices={tuple(name for name in category_names)},
-                        metavar="category to scrape string", help=f"{{{'choose by name' + ' ; '.join(category_names)}}}")
-    parser.add_argument('--country', metavar="country to scrape", help="choose by country name")  # TODO: make country arg work
-    parser.add_argument('-r', type=str, help="comma separated ranges [0-10000]",
+
+    parser.add_argument('-c', '--cat_int', type=int, choices=range(0, len(cfg.CATEGORIES)+1),
+                        metavar="category to scrape int", default=2,
+                        help=f"{{{'choose by number' + ' ; '.join(cfg.CAT_NAMES)}}}")
+    parser.add_argument('-C', '--cat_str', type=str.lower, choices=cfg.CAT_NAMES,
+                        metavar="category to scrape string",
+                        help=f"{{{'choose by name' + ' ; '.join(cfg.CAT_NAMES)}}}")
+    # parser.add_argument('--country', metavar="country to scrape", help="choose by country name")  # TODO: make country arg work
+    parser.add_argument('-r', type=str, help="range of trails to extract, dash separated e.g. '0-100'",
                         metavar='trails range')
+    parser.add_argument('-f', help='This will extract all available trails from the chosen category',
+                        action='store_true')
     parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
                         action='store_true')
     return parser
@@ -89,22 +92,22 @@ def parse_handler(args):
     :return: cat_to_scrape = list of category tuples of (name, url), range_list = tuple of range limits
     """
     if args.extract_all:
-        cat_to_scrape = cfg.CATEGORIES.values()
-        range_list = (0, 10000)
+        cat_to_scrape = [(name, url) for name, url in cfg.CATEGORIES.values()]
+        range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
     else:
         if args.cat_int:
-            cat_to_scrape = cfg.CATEGORIES[args.cat_int]
+            cat_to_scrape = [cfg.CATEGORIES[args.cat_int]]
         elif args.cat_str:
-            cat_indices = [name for name, url in cfg.CATEGORIES.values()].index(args.cat_str)
-            cat_to_scrape = cfg.CATEGORIES[cat_indices]
-        else:
-            cat_to_scrape = cfg.CATEGORIES[2]  # scrape HIKING category by default
+            cat_indices = cfg.CAT_NAMES.index(args.cat_str)
+            cat_to_scrape = [cfg.CATEGORIES[cat_indices]]
 
         try:
             if args.r:
                 range_list = parse_range(args.r)
+            elif args.f:
+                range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
             else:
-                range_list = parse_range(cfg.DEFAULT_TRAIL_RANGE)
+                range_list = (0, cfg.DEFAULT_TRAIL_RANGE)
         except ValueError:
             print('Could not parse your requested range, please use numbers and dashes: e.g. "2-86" ')
             print(ValueError)
@@ -129,15 +132,19 @@ def main():
     # TODO: simplify main, maybe implement classes
 
     # get all category names and urls:
-    categories_list = get_trail_categories()
-    args = get_parser(categories_list).parse_args()
+    # categories_list = get_trail_categories()  # get new categories list from website
+    args = get_parser().parse_args()
+    if len(sys.argv) == 1:
+        print(get_parser().format_help())
+        sys.exit()
+
     cat_to_scrape, range_list = parse_handler(args)
 
     extracted_trails_counter = 0
-    for category in cat_to_scrape:
-        print(f'getting urls from category: {category[0]}')
+    for cat_name, cat_url in cat_to_scrape:
+        print(f'getting urls from category: {cat_name}')
         for i in range(range_list[0], range_list[1], cfg.BATCH_SIZE):
-            trail_urls = get_trails_urls(category, (i, min(i+cfg.BATCH_SIZE, range_list[1])))
+            trail_urls = get_trails_urls((cat_name, cat_url), (i, min(i+cfg.BATCH_SIZE, range_list[1])))
             for trail_id in trail_urls.keys():
                 try:
                     url = trail_urls[trail_id][1]
@@ -176,8 +183,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # cats = get_trail_categories()
-    # c = [f' {i} : (\'{c[0]}\',\'{c[1]}\')' for i, c in enumerate(cats)]
-    # print(',\n'.join(c[1:]))
-
     main()
