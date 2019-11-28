@@ -32,7 +32,9 @@ def execute_commands(commands):
                 command +=';'
                 print(f'executing command: {command}')
                 cursor.execute(command)
+                res = cursor.fetchall()
                 connection.commit()
+        return res
     except Exception as e:
         print(f'Failed executing command: {command}\n Exception string:{e}')
     finally:
