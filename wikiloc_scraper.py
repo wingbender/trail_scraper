@@ -19,22 +19,12 @@ from webfunctions import get_page
 from helperfunctions import parse_range_list
 from trail_scraper import get_trail
 import argparse
+import config as cfg
 import time
 
 # TODO: add logging
 # TODO: add testing
 # TODO: add to command line interface option to run nonstop on specific category
-# TODO: transfer all the globals to config.py
-MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
-MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
-DEFAULT_CATEGORY_NAME = 'Hiking'  # Most interesting category for us right now, can be changed without any issue
-DEFAULT_TRAIL_RANGE = '0-100'  # Taking the first 100 trails by default
-# TIMEOUT = 60*3  # Timeout for the trail extraction operation
-BATCH_SIZE = MAX_TRAILS_PER_PAGE  # The batch of URLs to extract before starting to extract each trail
-MAX_TIMEOUTS = 30   # Max timeouts while extracting trails. if this number is reached,
-                    # something is probably wrong and we should check it
-MAX_HTTP_ERRORS = 5     # Max http errors while extracting trails. if this number is reached,
-                           # something is probably wrong and we should check it
 
 
 def get_trail_categories():
@@ -42,6 +32,8 @@ def get_trail_categories():
     extracts the categories names and urls from https://www.wikiloc.com/trails
     :return: dictionary category:url
     """
+    # return cfg.CATEGORIES
+
     root_path = 'https://www.wikiloc.com/trails'
     root_html_string = get_page(root_path)
     root_soup = bs(root_html_string.content, 'html.parser')
@@ -63,8 +55,8 @@ def get_trails_urls(category, range_limits):
     # maximum number of trails per page (MAX_TRAILS_PER_PAGE) is determined by wikiloc (25)
     from_trail, to_trail = range_limits
     trails_url_dict = {}
-    for i in range(max(0, from_trail), min(to_trail, MAX_TRAILS_IN_CATEGORY), MAX_TRAILS_PER_PAGE):
-        trails_list_url = category[1] + f'&s=last&from={i}&to={min(i + MAX_TRAILS_PER_PAGE, to_trail)}'
+    for i in range(max(0, from_trail), min(to_trail, cfg.MAX_TRAILS_IN_CATEGORY), cfg.MAX_TRAILS_PER_PAGE):
+        trails_list_url = category[1] + f'&s=last&from={i}&to={min(i + cfg.MAX_TRAILS_PER_PAGE, to_trail)}'
         trails_list_html = get_page(trails_list_url)
         trail_list_soup = bs(trails_list_html.content, 'html.parser')
         trail_list_container = trail_list_soup.find('ul', class_='trail-list')
@@ -119,7 +111,7 @@ def main():
             if args.r:
                 range_list = parse_range_list(args.r)[0]
             else:
-                range_list = parse_range_list(DEFAULT_TRAIL_RANGE)[0]
+                range_list = parse_range_list(cfg.DEFAULT_TRAIL_RANGE)[0]
         except ValueError:
             print('Could not parse your requested range, please use numbers and dashes: "2-86" ')
             print(ValueError)
@@ -137,16 +129,13 @@ def main():
         return
 
     extracted_trails_counter = 0
-    start_time = time.time()
     for category in categories_to_scrape:
         print(f'getting urls from category: {category[0]}')
-
-        for i in range(range_list[0], range_list[1], BATCH_SIZE):
-            trail_urls = get_trails_urls(category, (i, min(i+BATCH_SIZE, range_list[1])))
+        for i in range(range_list[0], range_list[1], cfg.BATCH_SIZE):
+            trail_urls = get_trails_urls(category, (i, min(i+cfg.BATCH_SIZE, range_list[1])))
             for trail_id in trail_urls.keys():
                 try:
                     url = trail_urls[trail_id][1]
-                    # TODO: add try/except TimeoutError for get_trail()
                     trail_data = get_trail(url)
                     extracted_trails_counter += 1
                     # for now print data to screen
@@ -154,18 +143,16 @@ def main():
                     print(f'\nextracted so far: {extracted_trails_counter}')
                     print('---------------------------------------------\n')
                     # TODO: here add where to save data
-
                 except ValueError as ve:
                     print(f'Value error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
                     print(ve)
                     print(f'skipping trail')
-
                 except TimeoutError as te:
-                    print(f'Value error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
+                    print(f'Timeout error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
                     print(te)
                     if 'trail_timeouts' in vars():
                         trail_timeouts += 1
-                        if trail_timeouts >= MAX_TIMEOUTS:
+                        if trail_timeouts >= cfg.MAX_TIMEOUTS:
                             print('Maximum number of timeouts reached, check your internet connection and try again')
                             return
                     else:
@@ -175,18 +162,17 @@ def main():
                     print(e)
                     if 'trail_http_errors' in vars():
                         trail_http_errors += 1
-                        if trail_http_errors >= MAX_HTTP_ERRORS:
+                        if trail_http_errors >= cfg.MAX_HTTP_ERRORS:
                             print('Maximum number of trail http errors reached, check the site and try again')
                             return
                     else:
                         trail_http_errors = 1
-                #TODO: add global timeout if needed (maybe debugging?
-
-                # if (time.time() - start_time) > TIMEOUT:
-                #     print('Timed out while scraping the site. consider using a faster connection '
-                #           'or extending the timeout limit')
-                #     return
+                #TODO: add global timeout if needed (maybe debugging?)
 
 
 if __name__ == '__main__':
+    # cats = get_trail_categories()
+    # c = [f' {i} : (\'{c[0]}\',\'{c[1]}\')' for i, c in enumerate(cats)]
+    # print(',\n'.join(c[1:]))
+
     main()

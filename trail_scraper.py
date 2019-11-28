@@ -7,20 +7,7 @@
 from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
 import re
-
-MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8,
-          'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
-          'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
-          1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
-CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852, 'km']}
-HOURS_IN_DAY = 24
-MINUTES_IN_HOUR = 60
-# List of the attributes extracted per trail and their units
-UNITS_MASTER = {'id': None, 'title': None, 'url': None, 'user_name': None, 'user_id': None, 'category': None,
-                'country': None, 'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
-                'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
-                'Uploaded': 'YYYY-MM-DD', 'Recorded': 'YYYY-MM-DD', 'No of coordinates': None,
-                'Moving time': 'minutes', 'Technical difficulty': None}
+import config as cfg
 
 def get_trail(trail_page_url):
     """
@@ -118,16 +105,16 @@ def convert_values(trail_data):
 
         elif attribute in numeric_attributes:  # numerical values as floats and unit conversion
             out_value = float(value[0].replace(',', ''))
-            if value[1] in CONVERSION_DICT.keys():
-                out_value = out_value * CONVERSION_DICT[value[1]][0]
+            if value[1] in cfg.CONVERSION_DICT.keys():
+                out_value = out_value * cfg.CONVERSION_DICT[value[1]][0]
             elif value[1] not in ['m', 'km']:
                 raise ValueError(f"Units of trail id {trail_data['id']} do not match the UNIT_MASTER key\n"
                                  f"Unit {value[1]} unrecognized!")
         elif attribute in time_attributes:
             total_time_minutes = 0
             # (regex, multiplier to minutes)
-            for regex, multiplier in [(r"([\d]*) days", HOURS_IN_DAY * MINUTES_IN_HOUR),
-                                      (r"([\d]*) hour", MINUTES_IN_HOUR),
+            for regex, multiplier in [(r"([\d]*) days", cfg.HOURS_IN_DAY * cfg.MINUTES_IN_HOUR),
+                                      (r"([\d]*) hour", cfg.MINUTES_IN_HOUR),
                                       (r"([\d]*) minute", 1)]:
                 match = re.search(regex, value[0].replace('one', '1'))
                 if match:
@@ -143,7 +130,7 @@ def convert_values(trail_data):
                     if match_content.isdigit():
                         date_string = date_string.replace(part_symbol, '{:02d}'.format(int(match_content)))
                     else:
-                        date_string = date_string.replace(part_symbol, str(MONTHS[match_content.lower()]))
+                        date_string = date_string.replace(part_symbol, str(cfg.MONTHS[match_content.lower()]))
             out_value = date_string.replace('-DD', '-01')  # if given only month, auto fill day as 1st
 
         else:

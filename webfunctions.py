@@ -4,7 +4,8 @@
     The function get_page() is called by get_trail() in the file trail_scraper.py """
 
 import requests
-PAGE_TIMEOUT = 5
+import config as cfg
+
 
 
 def get_headers():
@@ -26,7 +27,7 @@ def get_page(page_url):
     :return: string HTML string
     """
     try:
-        page = requests.get(page_url, headers=get_headers(), timeout=PAGE_TIMEOUT)
+        page = requests.get(page_url, headers=get_headers(), timeout=cfg.PAGE_TIMEOUT)
         page.raise_for_status()
     except Exception:
         raise requests.HTTPError(Exception)
