@@ -11,8 +11,9 @@ if os.path.exists(DB_FILENAME):
 
 with sqlite3.connect(DB_FILENAME) as con:
     cur = con.cursor()
+    # TODO: add autoincrement to primary key
     cur.execute('''CREATE TABLE trails (
-                        id INT PRIMARY KEY, 
+                        id INT PRIMARY KEY , #  
                         wikiloc_id INT,
                         title TEXT,
                         url TEXT,

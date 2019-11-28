@@ -24,7 +24,7 @@ import time
 # TODO: add logging
 # TODO: add testing
 # TODO: add to command line interface option to run nonstop on specific category
-
+# TODO: transfer all the globals to config.py
 MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
 MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
 DEFAULT_CATEGORY_NAME = 'Hiking'  # Most interesting category for us right now, can be changed without any issue
@@ -79,7 +79,7 @@ def get_parser(category_names):
     an argument parser to parse arguments: -C category -c category number(s)
     :return:
     """
-
+    # TODO: Make argument parser return help if no arguments are passed
     parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
     parser.add_argument('-c', '--cat_int', type=int, choices=range(0, len(category_names)+1),
                         metavar="category to scrape int", help=f"{{{'choose by number' + ' ; '.join(category_names)}}}")
@@ -93,6 +93,8 @@ def get_parser(category_names):
 
 
 def main():
+    # TODO: simplify main, maybe implement classes
+
     # get all category names and urls:
     categories_list = get_trail_categories()
     category_names = [f"[{str(i)}] {cat[0]}" for i, cat in enumerate(categories_list)]
