@@ -104,19 +104,34 @@ def parse_handler(args):
         if args.cat_int:
             cat_to_scrape = [args.cat_int]
         elif args.cat_str:
+
             cat_to_scrape = CATEGORIES[list(CATEGORIES.values()).index(args.cat_str)]
         else:
             cat_to_scrape = 2  # scrape HIKING category by default
 
         try:
             if args.r:
-                range_list = parse_range_list(args.r)[0]
+                range_list = parse_range(args.r)
             else:
-                range_list = parse_range_list(DEFAULT_TRAIL_RANGE)[0]
+                range_list = parse_range(DEFAULT_TRAIL_RANGE)
         except ValueError:
             print('Could not parse your requested range, please use numbers and dashes: "2-86" ')
             print(ValueError)
             return
+
+
+def parse_range(r):
+    """ Function to parse range list string. e.g. "1-10" -> return tuple (0, 100)"""
+    if not r:
+        return []
+    parts = r.split("-")
+    if len(parts) == 1:  # if given 1 value, take range from 0->value
+        return 0, int(r)
+    elif len(parts) == 2:
+        return int(parts[0]), int(parts[1])
+    if len(parts) > 2:
+        raise ValueError("Invalid range: {}".format(r))
+
 
 def main():
     # TODO: simplify main, maybe implement classes
