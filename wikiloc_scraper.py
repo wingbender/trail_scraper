@@ -98,17 +98,15 @@ def get_parser(categories_list):
 def parse_handler(args):
     """ Function to handle the argument parser results """
     if args.extract_all:
-        cat_to_scrape = CATEGORIES.values()
+        cat_to_scrape = CATEGORIES.keys()
         range_list = (0, 10000)
     else:
         if args.cat_int:
             cat_to_scrape = [args.cat_int]
         elif args.cat_str:
-            cat_to_scrape = [cat[0] for cat in categories_list].index(args.cat_str)
-            if cat_to_scrape == -1:
-                cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
+            cat_to_scrape = CATEGORIES[list(CATEGORIES.values()).index(args.cat_str)]
         else:
-            cat_to_scrape = [cat[0] for cat in categories_list].index('Hiking')
+            cat_to_scrape = 2  # scrape HIKING category by default
 
         try:
             if args.r:

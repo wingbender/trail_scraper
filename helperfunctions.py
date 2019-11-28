@@ -9,12 +9,12 @@ def parse_range_list(rl):
     :return: list of tuples of range limits
     """
     def parse_range(r):
-        if len(r) == 0:
+        if not r:
             return []
-        elif len(r) == 1:  # if given 1 value, take range from 0->value
+        parts = r.split("-")
+        if len(parts) == 1:  # if given 1 value, take range from 0->value
             return 0, r
-        elif len(r) == 2:
-            parts = r.split("-")
+        elif len(parts) == 2:
             return int(parts[0]), int(parts[-1])
         if len(parts) > 2:
             raise ValueError("Invalid range: {}".format(r))
