@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS trails;
-CREATE DATABASE trails;
-USE trails;
+DROP DATABASE IF EXISTS `trails`;
+CREATE DATABASE `trails`;
+USE `trails`;
 
 DROP TABLE IF EXISTS `trails`;
 CREATE TABLE `trails` (
@@ -36,8 +36,24 @@ CREATE TABLE `users` (
   `user_name` TEXT
 );
 
+CREATE INDEX category_id_idx ON `trails` (`category_id`);
+
 ALTER TABLE `categories` ADD FOREIGN KEY (`category_id`) REFERENCES `trails` (`category_id`);
+
+CREATE INDEX user_id_idx ON `trails` (`user_id`);
 
 ALTER TABLE `users` ADD FOREIGN KEY (`user_id`) REFERENCES `trails` (`user_id`);
 
 CREATE INDEX `trail_ids_idx` ON `trails` (`trail_id`, `wikiloc_id`);
+
+USE trails;
+
+SELECT DATABASE();
+
+SHOW TABLES;
+
+DESCRIBE trails;
+
+DESCRIBE users;
+
+DESCRIBE categories;

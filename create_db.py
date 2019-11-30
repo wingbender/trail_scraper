@@ -15,13 +15,17 @@ def get_commands_file(filename):
         return ret
 
 
-def execute_commands(commands):
+def execute_commands(commands, username=None, password=None):
     try:
-        username = 'root'
-        prompt = f'enter password for user {username}: '
+        if not username:
+            prompt = f'enter username: '
+            username = input(prompt)
+        if not password:
+            prompt = f'enter password for user {username}:'
+            password = input(prompt)
         host = 'localhost'
         # password = getpass(prompt=prompt)
-        password = input(prompt)
+        res=[]
         connection = pymysql.connect(host='localhost',
                                      user=username,
                                      password=password,
@@ -32,7 +36,7 @@ def execute_commands(commands):
                 command +=';'
                 print(f'executing command: {command}')
                 cursor.execute(command)
-                res = cursor.fetchall()
+                res.append(cursor.fetchall())
                 connection.commit()
         return res
     except Exception as e:
@@ -42,8 +46,11 @@ def execute_commands(commands):
 
 
 if __name__ == '__main__':
-    dbs = execute_commands(['SHOW DATABASES'])
-    print(dbs)
-    # commands = get_commands_file(DB_CREATION_FILENAME)
-    # execute_commands(commands)
+    password = input('pass for root: ')
+    commands = get_commands_file(DB_CREATION_FILENAME)
+    results = execute_commands(commands, 'root', password)
+    print([r for r in results if r])
+
+
+
 
