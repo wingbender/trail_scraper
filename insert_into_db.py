@@ -1,11 +1,10 @@
 """ This file inputs new data into wikiloc scraper database
     -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project """
 
-import sqlite3
+import pymysql
+import config as cfg'
 
-DB_FILENAME = 'trails.db'
-
-def insert_into_db(trail_data):
+def insert_into_db(trails_data):
     """ Function that inserts "trail data" into trails, categories and users tables in database """
     with sqlite3.connect(DB_FILENAME) as con:
         cur = con.cursor()

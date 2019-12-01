@@ -104,3 +104,23 @@ CATEGORIES = {1: ('Mountain biking', 'https://www.wikiloc.com/trails/mountain-bi
               73: ('With baby carriage', 'https://www.wikiloc.com/trails/with-baby-carriage'),
               74: ('Splitboard', 'https://www.wikiloc.com/trails/splitboard'),
               75: ('Gravel Bike', 'https://www.wikiloc.com/trails/gravel-bike')}
+DB_FILENAME = 'trails'
+
+TRAIL_TO_DB_FIELDS_trails={
+    'id': 'trails.wikiloc_id',
+    'title': 'trails.title',
+    'url': 'trails.url',
+    'user_id': 'user_id',
+    'country': 'country',
+    'Distance': 'distance',
+    'Ends at start point (loop)': 'loop',
+    'Elevation gain uphill': 'elevation_gain',
+    'Elevation max': 'elevation_max',
+    'Elevation gain downhill': 'elevation_loss',
+    'Elevation min': 'elevation_min',
+    'Time': 'total_time',
+    'Uploaded': 'uploaded',
+    'Recorded': 'recorded',
+    'No of coordinates': 'n_coords',
+    'Moving time': 'moving_time',
+    'Technical difficulty': 'difficulty'}
