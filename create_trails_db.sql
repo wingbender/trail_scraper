@@ -33,10 +33,13 @@ CREATE TABLE `categories` (
 
 CREATE TABLE `users` (
   `user_id` int PRIMARY KEY,
+  `wikiloc_user_id` int,
   `user_name` TEXT
 );
 
 CREATE INDEX category_id_idx ON `trails` (`category_id`);
+
+CREATE INDEX user_ids_idx ON `users` (user_id, wikiloc_user_id);
 
 ALTER TABLE `categories` ADD FOREIGN KEY (`category_id`) REFERENCES `trails` (`category_id`);
 

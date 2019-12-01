@@ -109,9 +109,9 @@ CAT_NAMES = [name for name, url in CATEGORIES.values()]
 DB_FILENAME = 'trails'
 
 TRAIL_TO_DB_FIELDS_trails={
-    'id': 'trails.wikiloc_id',
-    'title': 'trails.title',
-    'url': 'trails.url',
+    'id': 'wikiloc_id',
+    'title': 'title',
+    'url': 'url',
     'user_id': 'user_id',
     'country': 'country',
     'Distance': 'distance',
