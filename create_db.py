@@ -1,4 +1,5 @@
-# import the mysql client for python
+""" This file creates the databases and tables for wikiloc scraper data
+    -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project """
 
 import pymysql.cursors
 from getpass import getpass
@@ -46,6 +47,8 @@ def execute_commands(commands, username=None, password=None):
 
 
 if __name__ == '__main__':
+    # TODO: Change this to the following code when deploying:
+    # password = getpass(prompt=prompt)
     password = input('pass for root: ')
     commands = get_commands_file(DB_CREATION_FILENAME)
     results = execute_commands(commands, 'root', password)
