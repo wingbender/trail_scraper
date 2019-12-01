@@ -21,7 +21,7 @@ CREATE TABLE `trails` (
   `total_time` INT,
   `uploaded` TEXT,
   `recorded` TEXT,
-  `coords_n` INT,
+  `n_coords` INT,
   `difficulty` INT
 );
 
