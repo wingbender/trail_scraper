@@ -32,7 +32,7 @@ def create_user(wikiloc_user_id, wikiloc_user_name, username=None, password=None
         with connection.cursor() as cursor:
             command = f''' 
             INSERT INTO users(wikiloc_user_id, user_name)
-            VALUES ({wikiloc_user_id}, {wikiloc_user_name});
+            VALUES ('{wikiloc_user_id}', '{wikiloc_user_name}');
             '''
             res = cursor.execute(command)
         return res
@@ -60,7 +60,7 @@ def check_user_exists(wikiloc_user_id, username=None, password=None):
             command = f''' 
             SELECT user_id
             FROM users
-            WHERE wikiloc_user_id == {wikiloc_user_id};
+            WHERE wikiloc_user_id == '{wikiloc_user_id}';
             '''
             res = cursor.fetchone(command)
         return res
@@ -101,9 +101,16 @@ def insert_into_db(trails_data, username=None, password=None):
                 command = f"""
                         INSERT INTO `trails`
                         ({', '.join(cfg.TRAIL_TO_DB_FIELDS_trails.values())},category_id, user_id) VALUES 
-                        ({', '.join([str(trail_data[r]) for r in cfg.TRAIL_TO_DB_FIELDS_trails.keys() if r 
+                        ({', '.join(["'" + str(trail_data[r]) + "'" for r in cfg.TRAIL_TO_DB_FIELDS_trails.keys() if r 
                                      in trail_data.keys()])}
                         ,{category_id},{user_id});"""
+                # TODO: Handle missing 'moving time'.
+                ###### WORKING STATEMENT:
+                # INSERT INTO trails
+                # (trail_id,wikiloc_id, title, url, country, distance, elevation_gain, elevation_max, elevation_loss, elevation_min, total_time, uploaded, recorded, n_coords, moving_time, difficulty,category_id, user_id)
+                # VALUES
+                # (8,24124650, 'Finsteraahorn', 'https://www.wikiloc.com/splitboard-trails/finsteraahorn-24124650', 'Switzerland', 11.58696, 1323.1368, 4198.0104, 1633.1184, 2625.8520000000003, 530, '2018-4-19', '2018-4-01', 2946, 345.2, 4,73,5);
+
                 print(f'executing command: {command}')
                 cursor.execute(command)
             connection.commit()
