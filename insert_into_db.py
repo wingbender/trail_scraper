@@ -1,7 +1,7 @@
 """ This file inputs new data into wikiloc scraper database
     -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project """
 
-import sqlite3
+import pymysql
 
 DB_FILENAME = 'trails.db'
 
@@ -13,5 +13,5 @@ def insert_into_db(trail_data):
         # TODO: convert difficulty to integer rank
         # TODO: make sure to skip over duplicates / existing trails
         # TODO: add our own id index
-        cur.execute("INSERT INTO trails () \
-                                VALUES (?, ?, ?, ?, ?)", [])
+        for from_field, to_field in TRAIL_TO_DB_FIELDS.items():
+        cur.execute("INSERT INTO trails (from_field) VALUES (
