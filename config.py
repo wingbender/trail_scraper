@@ -106,3 +106,23 @@ CATEGORIES = {1: ('mountain biking', 'https://www.wikiloc.com/trails/mountain-bi
               75: ('gravel Bike', 'https://www.wikiloc.com/trails/gravel-bike')}
 
 CAT_NAMES = [name for name, url in CATEGORIES.values()]
+DB_FILENAME = 'trails'
+
+TRAIL_TO_DB_FIELDS_trails={
+    'id': 'trails.wikiloc_id',
+    'title': 'trails.title',
+    'url': 'trails.url',
+    'user_id': 'user_id',
+    'country': 'country',
+    'Distance': 'distance',
+    'Ends at start point (loop)': 'loop',
+    'Elevation gain uphill': 'elevation_gain',
+    'Elevation max': 'elevation_max',
+    'Elevation gain downhill': 'elevation_loss',
+    'Elevation min': 'elevation_min',
+    'Time': 'total_time',
+    'Uploaded': 'uploaded',
+    'Recorded': 'recorded',
+    'No of coordinates': 'n_coords',
+    'Moving time': 'moving_time',
+    'Technical difficulty': 'difficulty'}
