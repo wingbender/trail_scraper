@@ -21,11 +21,14 @@ from trail_scraper import get_trail
 import argparse
 import config as cfg
 import sys
+import db_handler
+import credentials
 import time
 
 # TODO: add logging
 # TODO: add testing
 # TODO: add to command line interface option to run nonstop on specific category
+# TODO: handle getting to the last page in category (try "wikiloc_scraper -c 73 -r 1000-1034")
 
 
 def get_trail_categories():
@@ -144,9 +147,12 @@ def main():
     cat_to_scrape, range_list = parse_handler(args)
 
     extracted_trails_counter = 0
+    if credentials.DB['password'] == '':
+        credentials.DB['password'] = input(f'DB password for user {credentials.DB["username"]}: ')
     for cat_name, cat_url in cat_to_scrape:
         print(f'getting urls from category: {cat_name}')
         for i in range(range_list[0], range_list[1], cfg.BATCH_SIZE):
+            trails_data = []
             trail_urls = get_trails_urls((cat_name, cat_url), (i, min(i+cfg.BATCH_SIZE, range_list[1])))
             for trail_id in trail_urls.keys():
                 try:
@@ -154,10 +160,13 @@ def main():
                     trail_data = get_trail(url)
                     extracted_trails_counter += 1
                     # for now print data to screen
-                    print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
-                    print(f'\nextracted so far: {extracted_trails_counter}')
-                    print('---------------------------------------------\n')
+                    if cfg.PRINT_TRAIL_DATA:
+                        print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
+                        print('---------------------------------------------\n')
                     # TODO: here add where to save data
+                    if cfg.SAVE_TRAIL_DATA:
+                        trails_data.append(trail_data)
+                    print(f'\nextracted so far: {extracted_trails_counter}')
                 except ValueError as ve:
                     print(f'Value error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
                     print(ve)
@@ -183,6 +192,8 @@ def main():
                     else:
                         trail_http_errors = 1
                 #TODO: add global timeout if needed (maybe debugging?)
+            if cfg.SAVE_TRAIL_DATA:
+                db_handler.insert_into_db(trails_data)
 
 
 if __name__ == '__main__':

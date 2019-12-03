@@ -97,7 +97,7 @@ def build_insert_command(trail_data, category_id, user_id):
             command += str(cfg.DIFFICULTY_LEVELS[trail_data[dat]]) + ','
         # Handling strings (add '')
         elif type(trail_data[dat]) == str:
-            command += f"'{trail_data[dat]}',"
+            command += f"'{pymysql.escape_string(trail_data[dat])}',"
         # Handling
         elif type(trail_data[dat]) in [int, float]:
             command += str(trail_data[dat]) + ','
@@ -130,8 +130,11 @@ def insert_into_db(trails_data):
                     print(f"exception message: {e}")
                 command = build_insert_command(trail_data, category_id, user_id)
 
-                print(f'executing command: {command}')
-                cursor.execute(command)
+                # print(f'executing command: {command}')
+                try:
+                    cursor.execute(command)
+                except Exception as e:
+                    print(f'Failed executing command: {command}\n Exception string:{e}')
             connection.commit()
     except Exception as e:
         print(f'Failed executing command: {command}\n Exception string:{e}')
@@ -146,11 +149,11 @@ def main():
 
 
 def test():
-    trail_url = 'https://www.wikiloc.com/kayaking-canoeing-trails/el-congost-de-mont-rebei-amb-kaiac-i-la-tornada-a-peu-29278304'
+    trail_url = 'https://www.wikiloc.com/trail-running-trails/porton-9-el-clasico-44046254'
     trail_data = trail_scraper.get_trail(trail_url)
     insert_into_db([trail_data])
 
 
 if __name__ == '__main__':
-    # test()
+    test()
     main()
