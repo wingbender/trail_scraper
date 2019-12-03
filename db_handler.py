@@ -125,7 +125,7 @@ def insert_into_db(trails_data):
                 try:
                     user_id = get_user_id(trail_data['user_id'], trail_data['user_name'])
                 except Exception as e:
-                    print(f"Couldnot find user id = {trail_data['user_id']} or create new one in the databse")
+                    print(f"Could not find user id = {trail_data['user_id']} or create new one in the database")
                     print(f"exception message: {e}")
                 command = build_insert_command(trail_data, category_id, user_id)
 
@@ -137,7 +137,7 @@ def insert_into_db(trails_data):
     finally:
         connection.close()
 
-
+    # TODO: do not insert same trail twice, unless it is updated and then rewrite
 def main():
     pass
 
