@@ -20,6 +20,7 @@ MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june':
           'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
           1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
 CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852, 'km']}
+DIFFICULTY_LEVELS = {'Easy': 1, 'Moderate': 2, 'Difficult': 3, 'Very difficult': 4, 'Experts only': 5}
 HOURS_IN_DAY = 24
 MINUTES_IN_HOUR = 60
 # List of the attributes extracted per trail and their units
@@ -115,7 +116,7 @@ TRAIL_TO_DB_FIELDS_trails={
     'user_id': 'user_id',
     'country': 'country',
     'Distance': 'distance',
-    'Ends at start point (loop)': 'loop',
+    'Ends at start point (loop)': 'is_loop',
     'Elevation gain uphill': 'elevation_gain',
     'Elevation max': 'elevation_max',
     'Elevation gain downhill': 'elevation_loss',

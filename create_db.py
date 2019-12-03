@@ -3,8 +3,21 @@
 
 import pymysql.cursors
 from getpass import getpass
+import credentials
 
 DB_CREATION_FILENAME = 'create_trails_db.sql'
+
+
+def get_connection():
+    if credentials.DB['password'] == '':
+        credentials.DB['password'] = input('pass?: ')
+    connection = pymysql.connect(host=credentials.DB['host'],
+                                 user=credentials.DB['username'],
+                                 password=credentials.DB['password'],
+                                 charset='utf8mb4',
+                                 cursorclass=pymysql.cursors.DictCursor
+                                 )
+    return connection
 
 
 def get_commands_file(filename):
@@ -16,25 +29,13 @@ def get_commands_file(filename):
         return ret
 
 
-def execute_commands(commands, username=None, password=None):
+def execute_commands(commands):
     try:
-        if not username:
-            prompt = f'enter username: '
-            username = input(prompt)
-        if not password:
-            prompt = f'enter password for user {username}:'
-            password = input(prompt)
-        host = 'localhost'
-        # password = getpass(prompt=prompt)
-        res=[]
-        connection = pymysql.connect(host='localhost',
-                                     user=username,
-                                     password=password,
-                                     charset='utf8mb4',
-                                     cursorclass=pymysql.cursors.DictCursor)
+        connection = get_connection()
+        res = []
         with connection.cursor() as cursor:
             for command in commands:
-                command +=';'
+                command += ';'
                 print(f'executing command: {command}')
                 cursor.execute(command)
                 res.append(cursor.fetchall())
@@ -49,9 +50,8 @@ def execute_commands(commands, username=None, password=None):
 if __name__ == '__main__':
     # TODO: Change this to the following code when deploying:
     # password = getpass(prompt=prompt)
-    password = input('pass for root: ')
     commands = get_commands_file(DB_CREATION_FILENAME)
-    results = execute_commands(commands, 'root', password)
+    results = execute_commands(commands)
     print([r for r in results if r])
 
 
