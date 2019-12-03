@@ -77,6 +77,7 @@ def build_insert_command(trail_data, category_id, user_id):
     """
     Creates an INSERT command based on the data given
     """
+    # TODO: work on robustness, maybe create a dictionary first and then turn it into SQL command?
     command = ''
     command += 'INSERT INTO trails('
     command += ', '.join(
@@ -88,6 +89,7 @@ def build_insert_command(trail_data, category_id, user_id):
         if dat not in trail_data.keys():
             continue
         if dat == 'user_id':
+        # TODO: maybe delete this attribute from the dictionary
             continue
         # Converting 'Technical difficulty' to INT for the database
         if dat.lower() == 'technical difficulty':
