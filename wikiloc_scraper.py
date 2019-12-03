@@ -10,6 +10,7 @@
     [-c category to scrape int]: category to scrape by number
     [-C category to scrape string]: category to scrape by name
     [-r trails range]: range of trails to scrape e.g.: '14-76'
+    [-f]: extracts the max number of trails from a category
     [-FF]: scrape the entire site. if this flag is passed all others will be ignored
     """
 
@@ -78,13 +79,14 @@ def get_parser():
     parser.add_argument('-C', '--cat_str', type=str.lower, choices=cfg.CAT_NAMES,
                         metavar="category to scrape string",
                         help=f"{{{'choose by name' + ' ; '.join(cfg.CAT_NAMES)}}}")
-    # parser.add_argument('--country', metavar="country to scrape", help="choose by country name")  # TODO: make country arg work
     parser.add_argument('-r', type=str, help="range of trails to extract, dash separated e.g. '0-100'",
                         metavar='trails range')
     parser.add_argument('-f', help='This will extract all available trails from the chosen category',
                         action='store_true')
     parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
                         action='store_true')
+    # parser.add_argument('--country', metavar="country to scrape", help="choose by country name")  # TODO: make country arg work
+
     return parser
 
 def parse_handler(args):
@@ -114,6 +116,7 @@ def parse_handler(args):
             return
 
     return cat_to_scrape, range_list
+
 
 def parse_range(r):
     """ Function to parse range list string. e.g. "1-10" -> return tuple (0, 100)"""
