@@ -1,3 +1,9 @@
+"""
+    Global constants used through the program
+    -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project
+"""
+
+
 MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
 MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
 DEFAULT_CATEGORY_NAME = 'Hiking'  # Most interesting category for us right now, can be changed without any issue
@@ -13,7 +19,8 @@ MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june':
           'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
           'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
           1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
-CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852, 'km']}
+CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852, 'km'], 'nautical miles': [1.852, 'km']}
+DIFFICULTY_LEVELS = {'Easy': 1, 'Moderate': 2, 'Difficult': 3, 'Very difficult': 4, 'Experts only': 5}
 HOURS_IN_DAY = 24
 MINUTES_IN_HOUR = 60
 # List of the attributes extracted per trail and their units
@@ -100,3 +107,23 @@ CATEGORIES = {0: ('mountain biking', 'https://www.wikiloc.com/trails/mountain-bi
               74: ('gravel Bike', 'https://www.wikiloc.com/trails/gravel-bike')}
 
 CAT_NAMES = [name for name, url in CATEGORIES.values()]
+DB_FILENAME = 'trails'
+
+TRAIL_TO_DB_FIELDS_trails={
+    'id': 'wikiloc_id',
+    'title': 'title',
+    'url': 'url',
+    'user_id': 'user_id',
+    'country': 'country',
+    'Distance': 'distance',
+    'Ends at start point (loop)': 'is_loop',
+    'Elevation gain uphill': 'elevation_gain',
+    'Elevation max': 'elevation_max',
+    'Elevation gain downhill': 'elevation_loss',
+    'Elevation min': 'elevation_min',
+    'Time': 'total_time',
+    'Uploaded': 'uploaded',
+    'Recorded': 'recorded',
+    'No of coordinates': 'n_coords',
+    'Moving time': 'moving_time',
+    'Technical difficulty': 'difficulty'}
