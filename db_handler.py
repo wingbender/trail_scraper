@@ -5,6 +5,7 @@
 import pymysql
 import config as cfg
 import credentials
+import trail_scraper
 
 
 def get_connection():
@@ -89,7 +90,7 @@ def build_insert_command(trail_data, category_id, user_id):
         if dat not in trail_data.keys():
             continue
         if dat == 'user_id':
-        # TODO: maybe delete this attribute from the dictionary
+            # TODO: maybe delete this attribute from the dictionary
             continue
         # Converting 'Technical difficulty' to INT for the database
         if dat.lower() == 'technical difficulty':
@@ -138,14 +139,18 @@ def insert_into_db(trails_data):
         connection.close()
 
     # TODO: do not insert same trail twice, unless it is updated and then rewrite
+
+
 def main():
     pass
 
 
 def test():
-    pass
+    trail_url = 'https://www.wikiloc.com/kayaking-canoeing-trails/el-congost-de-mont-rebei-amb-kaiac-i-la-tornada-a-peu-29278304'
+    trail_data = trail_scraper.get_trail(trail_url)
+    insert_into_db([trail_data])
 
 
 if __name__ == '__main__':
-    test()
+    # test()
     main()

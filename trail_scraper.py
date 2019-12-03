@@ -9,6 +9,7 @@ from webfunctions import get_page
 import re
 import config as cfg
 
+
 def get_trail(trail_page_url):
     """
     This function requests the web page, parses and extracts the trail data from the html, converts units and returns
@@ -160,13 +161,14 @@ def offline_data_test():
     trail_data = extract_trail_data(test_page)
     trail_data = convert_values(trail_data)
     print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
+    return trail_data
 
 
 def online_data_test():
     """ Function to test online extraction of trail data from a trail page on wikiloc.com"""
     trail_data = get_trail("https://www.wikiloc.com/splitboard-trails/finsteraahorn-24124650")
     print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
-
+    return trail_data
     # check if raises ValueError in get_trail() in case of units mismatch - changed UNITS_MASTER just for this
 
 

@@ -19,7 +19,7 @@ MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june':
           'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
           'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
           1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 12: 12}
-CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852, 'km']}
+CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852, 'km'], 'nautical miles': [1.852, 'km']}
 DIFFICULTY_LEVELS = {'Easy': 1, 'Moderate': 2, 'Difficult': 3, 'Very difficult': 4, 'Experts only': 5}
 HOURS_IN_DAY = 24
 MINUTES_IN_HOUR = 60
