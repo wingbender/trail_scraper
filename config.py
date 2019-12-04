@@ -5,6 +5,10 @@
 
 SAVE_TRAIL_DATA = True
 PRINT_TRAIL_DATA = False
+UPDATE_TRAILS = False
+
+DB_FILENAME = 'trails'
+
 MAX_TRAILS_PER_PAGE = 25  # This is determined by the wikiloc.com site, found out manually
 MAX_TRAILS_IN_CATEGORY = 10000  # This is determined by the wikiloc.com site, found out manually
 DEFAULT_CATEGORY_NAME = 'Hiking'  # Most interesting category for us right now, can be changed without any issue
@@ -16,6 +20,7 @@ MAX_TIMEOUTS = 30  # Max timeouts while extracting trails. if this number is rea
 MAX_HTTP_ERRORS = 5  # Max http errors while extracting trails. if this number is reached,
 # something is probably wrong and we should check it
 PAGE_TIMEOUT = 5
+
 MONTHS = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6, 'july': 7, 'august': 8,
           'september': 9, 'october': 10, 'november': 11, 'december': 12, 'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4,
           'jun': 6, 'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12,
@@ -108,7 +113,6 @@ CATEGORIES = {0: ('mountain biking', 'https://www.wikiloc.com/trails/mountain-bi
               74: ('gravel Bike', 'https://www.wikiloc.com/trails/gravel-bike')}
 
 CAT_NAMES = [name for name, url in CATEGORIES.values()]
-DB_FILENAME = 'trails'
 
 TRAIL_TO_DB_FIELDS_trails={
     'id': 'wikiloc_id',

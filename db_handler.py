@@ -141,7 +141,28 @@ def insert_into_db(trails_data):
     finally:
         connection.close()
 
-    # TODO: do not insert same trail twice, unless it is updated and then rewrite
+    # TODO: implement updating if the trail already exists
+
+
+def get_trail_ids_from_db(*kwargs):
+    """Returns a list of tuples with (database trail_id, wikiloc trail_id)"""
+    try:
+        connection = get_connection()
+        with connection.cursor() as cursor:
+            cursor.execute(f'USE trails')
+            connection.commit()
+            command = r'SELECT trail_id, wikiloc_id FROM trails'
+            cursor.execute(command)
+            result = cursor.fetchall()
+    except Exception as e:
+        print(f'Could not load existing trails from DB. \nException string: {e}')
+    if result and result is not None:
+        return [(item['trail_id'], item['wikiloc_id']) for item in result]
+    else:
+        return None
+
+
+
 
 
 def main():
@@ -152,6 +173,9 @@ def test():
     trail_url = 'https://www.wikiloc.com/trail-running-trails/porton-9-el-clasico-44046254'
     trail_data = trail_scraper.get_trail(trail_url)
     insert_into_db([trail_data])
+    trail_ids = get_trail_ids_from_db()
+
+    print(trail_ids)
 
 
 if __name__ == '__main__':
