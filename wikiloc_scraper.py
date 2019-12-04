@@ -74,8 +74,8 @@ def get_parser():
     """
     parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
 
-    parser.add_argument('-c', '--cat_int', type=int, choices=range(0, len(cfg.CATEGORIES)+1),
-                        metavar="category to scrape int", default=1,
+    parser.add_argument('-c', '--cat_int', type=int, choices=range(1, len(cfg.CATEGORIES)+2),
+                        metavar="category to scrape int", default=2,
                         help="{{choose by number\n" +
                              "; ".join([str(i) + ': ' + name for i, name in enumerate(cfg.CAT_NAMES)]) + '}}')
     parser.add_argument('-C', '--cat_str', type=str.lower, choices=cfg.CAT_NAMES,
