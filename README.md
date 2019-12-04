@@ -14,15 +14,21 @@ You'll need python 3.6 with "requests", "BeautifulSoup", "re" and "pymysql" to r
 
 ## Using the program
 1) Run the create_db.py file in order to create locally a MySQL database.
-see trail_DB.pdf for the database diagram.
+    a. See trail_DB.pdf for the database diagram.
+    b. The credentials.py file can be edited for each user access to its server.
 
 2) Run wikiloc_scraper.py with the following command line arguments:
 
     [-h] : show help message
+    
     [-c category to scrape int]: category to scrape by number
+    
     [-C category to scrape string]: category to scrape by name
+    
     [-r trails range]: range of trails to scrape e.g.: '14-76'
+    
     [-f]: extracts the max number of trails from a category
+    
     [-FF]: scrape the entire site. if this flag is passed all others will be ignored
 
 
@@ -40,7 +46,6 @@ For example:
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
-
 
 * count dracula (Roi)
 * dad (Sagiv)
