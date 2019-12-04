@@ -151,16 +151,16 @@ def main():
     extracted_trails_counter = 0
     if credentials.DB['password'] == '':
         credentials.DB['password'] = input(f'DB password for user {credentials.DB["username"]}: ')
-    existing_trail_ids = db_handler.get_trail_ids_from_db()
-    if existing_trail_ids is not None:
-        _, extracted_wikiloc_ids = zip(*existing_trail_ids)
-    else:
-        extracted_wikiloc_ids = []
     for cat_name, cat_url in cat_to_scrape:
         print(f'getting urls from category: {cat_name}')
         for i in range(range_list[0], range_list[1], cfg.BATCH_SIZE):
             trails_data = []
             trail_urls = get_trails_urls((cat_name, cat_url), (i, min(i+cfg.BATCH_SIZE, range_list[1])))
+            existing_trail_ids = db_handler.check_trails_in_db(trail_urls.keys())
+            if existing_trail_ids is not None:
+                extracted_wikiloc_ids,_ = zip(*existing_trail_ids)
+            else:
+                extracted_wikiloc_ids = []
             for trail_id in trail_urls.keys():
                 if trail_id in extracted_wikiloc_ids and not cfg.UPDATE_TRAILS:
                     print(f'Skipping trail id {trail_id}, already in DB')
