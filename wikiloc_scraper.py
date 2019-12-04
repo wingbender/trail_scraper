@@ -153,7 +153,11 @@ def main():
         print(f'getting urls from category: {cat_name}')
         for i in range(range_list[0], range_list[1], cfg.BATCH_SIZE):
             trails_data = []
-            trail_urls = get_trails_urls((cat_name, cat_url), (i, min(i+cfg.BATCH_SIZE, range_list[1])))
+            try:
+                trail_urls = get_trails_urls((cat_name, cat_url), (i, min(i+cfg.BATCH_SIZE, range_list[1])))
+            except Exception as e:
+                print(f"Reached the end of category '{cat_name}'")
+                break
             existing_trail_ids = db_handler.check_trails_in_db(trail_urls.keys())
             if existing_trail_ids is not None:
                 extracted_wikiloc_ids,_ = zip(*existing_trail_ids)
@@ -200,8 +204,13 @@ def main():
                     else:
                         trail_http_errors = 1
                 #TODO: add global timeout if needed (maybe debugging?)
-            if cfg.SAVE_TRAIL_DATA:
-                db_handler.insert_into_db(trails_data)
+            if cfg.SAVE_TRAIL_DATA and len(trails_data)> 0 :
+                inserted, inserted_details = db_handler.insert_into_db(trails_data)
+                print(f'{inserted} commited to database')
+                committed_wikiloc_ids, _ = zip(*inserted_details)
+                for trail_id in trail_urls.keys():
+                    if trail_id not in committed_wikiloc_ids:
+                        print(f'Trail {trail_id} was not committed to database, please check the log')
 
 
 if __name__ == '__main__':

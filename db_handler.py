@@ -11,7 +11,8 @@ import trail_scraper
 def get_connection():
     """
     Creates a connection to the DB based on the credentials in credentials.py
-    and returns if for use
+    and returns it for use. asks for a password if there is none in credentials.py
+    :return: database connection object
     """
     if credentials.DB['password'] == '':
         credentials.DB['password'] = input('pass?: ')
@@ -28,18 +29,24 @@ def get_user_id(wikiloc_user_id, wikiloc_user_name):
     """
     If the user is known, returns the user_id from the database that corresponds to the wikiloc_user_id.
     If the user is new, creates a new user and returns its user_id
+    :param wikiloc_user_id: [int] user_id from wikiloc
+    :param wikiloc_user_name: [str] user name from wikiloc
+    :return: [int] user_id in database
     """
     user_id = check_user_exists(wikiloc_user_id)
-    if user_id is not None:
-        return user_id['user_id']
+    if user_id is not -1:
+        return user_id
     else:
         create_user(wikiloc_user_id, wikiloc_user_name)
-        return check_user_exists(wikiloc_user_id)['user_id']
+        return check_user_exists(wikiloc_user_id)
 
 
 def create_user(wikiloc_user_id, wikiloc_user_name):
     """
     Creates a new user in the users table and returns its user_id
+    :param wikiloc_user_id: [int] user_id from wikiloc
+    :param wikiloc_user_name: [str] user name from wikiloc
+    :return: [bool] is successfully added
     """
     try:
         connection = get_connection()
@@ -50,7 +57,8 @@ def create_user(wikiloc_user_id, wikiloc_user_name):
             '''
             res = cursor.execute(command)
             connection.commit()
-        return res
+        return res is not None and res is 1
+
     except Exception as e:
         print(f'Failed executing command: {command}\n Exception string:{e}')
     finally:
@@ -60,6 +68,8 @@ def create_user(wikiloc_user_id, wikiloc_user_name):
 def check_user_exists(wikiloc_user_id):
     """
     Checks if user exists based on its wikiloc_user_id and returns {'user_id':user_id}  if it does and None if not
+    :param wikiloc_user_id: [int] user_id from wikiloc
+    :return: [int] user_id if exists, -1 if not
     """
     try:
         connection = get_connection()
@@ -67,7 +77,10 @@ def check_user_exists(wikiloc_user_id):
             command = f'SELECT user_id FROM users WHERE wikiloc_user_id = {wikiloc_user_id};'
             cursor.execute(command)
             res = cursor.fetchone()
-        return res
+        if res is None:
+            return -1
+        else:
+            return(res['user_id'])
     except Exception as e:
         print(f'Failed executing command: {command}\n Exception string:{e}')
     finally:
@@ -77,6 +90,10 @@ def check_user_exists(wikiloc_user_id):
 def build_insert_command(trail_data, category_id, user_id):
     """
     Creates an INSERT command based on the data given
+    :param trail_data: [dict] trail_data dictionary as created by trail_scraper.get_trail
+    :param category_id: [int] database category_id
+    :param user_id: [int] database user_id
+    :return: command to execute to insert the trail to database
     """
     # TODO: work on robustness, maybe create a dictionary first and then turn it into SQL command?
     command = ''
@@ -110,12 +127,19 @@ def build_insert_command(trail_data, category_id, user_id):
 
 
 def insert_into_db(trails_data):
-    """ Function that inserts "trail data" into trails, categories and users tables in database """
+    """
+    Function that inserts "trail data" into trails, categories and users tables in database
+    :param trails_data: [list(dict)] list of trail_data dictionaries as created by trail_scraper.get_trail
+    return (inserted, (wikiloc_trail_id,db_trail_id))
+    inserted: [int] number of new trails inserted to the database
+    trails_data: [list(tuple)] list of tuples with (wikiloc_trail_id, trail_id) for all the trails in trails_data
+    """
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
             cursor.execute(f'USE trails')
             connection.commit()
+            inserted = 0
             for trail_data in trails_data:
                 # get the category id and user id:
                 try:
@@ -132,10 +156,11 @@ def insert_into_db(trails_data):
 
                 # print(f'executing command: {command}')
                 try:
-                    cursor.execute(command)
+                    inserted += cursor.execute(command)
                 except Exception as e:
                     print(f'Failed executing command: {command}\n Exception string:{e}')
             connection.commit()
+            return inserted, check_trails_in_db([trail['id'] for trail in trails_data])
     except Exception as e:
         print(f'Failed executing command: {command}\n Exception string:{e}')
     finally:
@@ -145,24 +170,28 @@ def insert_into_db(trails_data):
 
 
 def check_trails_in_db(trail_wikiloc_ids):
-    """Returns a list of tuples with (database trail_id, wikiloc trail_id)"""
+    """
+    Returns a list of tuples (wikiloc trail_id, database trail_id)
+    with every trail from trail_wikiloc_ids that is already in the database
+    return (wikiloc_trail_id,db_trail_id)
+    """
     try:
         connection = get_connection()
         with connection.cursor() as cursor:
             cursor.execute(f'USE trails')
             connection.commit()
             command = r'SELECT trail_id, wikiloc_id FROM trails WHERE wikiloc_id in ('
-            command += ','.join([str(m_trail_wikiloc_id) for m_trail_wikiloc_id  in trail_wikiloc_ids])
+            command += ','.join([str(m_trail_wikiloc_id) for m_trail_wikiloc_id in trail_wikiloc_ids])
             command += ');'
             cursor.execute(command)
             result = cursor.fetchall()
     except Exception as e:
         print(f'Could not load existing trails from DB. \nException string: {e}')
-    if result and result is not None:
+
+    if 'result' in locals() and result is not None:
         return [(item['wikiloc_id'], item['trail_id']) for item in result]
     else:
         return None
-
 
 
 def main():
@@ -170,13 +199,11 @@ def main():
 
 
 def test():
+    pass
     # trail_url = 'https://www.wikiloc.com/trail-running-trails/porton-9-el-clasico-44046254'
     # trail_data = trail_scraper.get_trail(trail_url)
     # insert_into_db([trail_data])
-    # trail_ids = get_trail_ids_from_db()
-    #
-    # print(trail_ids)
-    res = check_trails_in_db([23098578,23096706,23068881,23068776,23061354,897])
+
 
 if __name__ == '__main__':
     test()
