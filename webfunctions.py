@@ -11,7 +11,6 @@ import config as cfg
 def get_headers():
     """
     generate headers to use when accessing a url
-    # TODO implement random header generator (Not required at this time)
     :return:
     """
     headers = {'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -22,7 +21,6 @@ def get_headers():
 def get_page(page_url):
     """
     returns an HTML string from page URL
-    # TODO: add logging
     :param page_url:
     :return: string HTML string
     """

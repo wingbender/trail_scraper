@@ -137,5 +137,5 @@ VALUES
     (72,'joëlette'),
     (73,'with baby carriage'),
     (74,'splitboard'),
-    (75,'gravel Bike');
+    (75,'gravel bike');
 

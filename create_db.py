@@ -2,7 +2,6 @@
     -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project """
 
 import pymysql.cursors
-from getpass import getpass
 import credentials
 
 DB_CREATION_FILENAME = 'create_trails_db.sql'
@@ -48,8 +47,6 @@ def execute_commands(commands):
 
 
 if __name__ == '__main__':
-    # TODO: Change this to the following code when deploying:
-    # password = getpass(prompt=prompt)
     commands = get_commands_file(DB_CREATION_FILENAME)
     results = execute_commands(commands)
     print([r for r in results if r])

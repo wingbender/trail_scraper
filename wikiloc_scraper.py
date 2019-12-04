@@ -27,8 +27,6 @@ import time
 
 # TODO: add logging
 # TODO: add testing
-# TODO: add to command line interface option to run nonstop on specific category
-# TODO: handle getting to the last page in category (try "wikiloc_scraper -c 73 -r 1000-1034")
 
 
 def get_trail_categories():
@@ -89,7 +87,8 @@ def get_parser():
                         action='store_true')
     parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
                         action='store_true')
-    # parser.add_argument('--country', metavar="country to scrape", help="choose by country name")  # TODO: make country arg work
+    # TODO: make country arg work
+    # parser.add_argument('--country', metavar="country to scrape", help="choose by country name")
 
     return parser
 
@@ -137,10 +136,7 @@ def parse_range(r):
 
 
 def main():
-    # TODO: simplify main, maybe implement classes
-
-    # get all category names and urls:
-    # categories_list = get_trail_categories()  # get new categories list from website
+    # categories_list = get_trail_categories()  # get new categories list of names and urls from website
     args = get_parser().parse_args()
     if len(sys.argv) == 1:
         print(get_parser().format_help())
