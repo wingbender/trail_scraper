@@ -110,7 +110,7 @@ CATEGORIES = {0: ('mountain biking', 'https://www.wikiloc.com/trails/mountain-bi
               71: ('joëlette', 'https://www.wikiloc.com/trails/joelette'),
               72: ('with baby carriage', 'https://www.wikiloc.com/trails/with-baby-carriage'),
               73: ('splitboard', 'https://www.wikiloc.com/trails/splitboard'),
-              74: ('gravel Bike', 'https://www.wikiloc.com/trails/gravel-bike')}
+              74: ('gravel bike', 'https://www.wikiloc.com/trails/gravel-bike')}
 
 CAT_NAMES = [name for name, url in CATEGORIES.values()]
 
