@@ -9,7 +9,7 @@ DB_CREATION_FILENAME = 'create_trails_db.sql'
 
 def get_connection():
     if credentials.DB['password'] == '':
-        credentials.DB['password'] = input('pass?: ')
+        credentials.DB['password'] = input(f'DB password for user {credentials.DB["username"]}: ')
     connection = pymysql.connect(host=credentials.DB['host'],
                                  user=credentials.DB['username'],
                                  password=credentials.DB['password'],

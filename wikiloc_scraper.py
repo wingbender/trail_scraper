@@ -159,7 +159,7 @@ def main():
                 print(f"Reached the end of category '{cat_name}'")
                 break
             existing_trail_ids = db_handler.check_trails_in_db(trail_urls.keys())
-            if existing_trail_ids is not None:
+            if existing_trail_ids is not None and len(existing_trail_ids) > 0:
                 extracted_wikiloc_ids,_ = zip(*existing_trail_ids)
             else:
                 extracted_wikiloc_ids = []

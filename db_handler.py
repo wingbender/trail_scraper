@@ -15,7 +15,7 @@ def get_connection():
     :return: database connection object
     """
     if credentials.DB['password'] == '':
-        credentials.DB['password'] = input('pass?: ')
+        credentials.DB['password'] = input(f'DB password for user {credentials.DB["username"]}: ')
     connection = pymysql.connect(host=credentials.DB['host'],
                                  user=credentials.DB['username'],
                                  password=credentials.DB['password'],
