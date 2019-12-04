@@ -14,8 +14,11 @@ You'll need python 3.6 with "requests", "BeautifulSoup", "re" and "pymysql" to r
 
 ## Using the program
 1) Run the create_db.py file in order to create locally a MySQL database.
+
     a. See trail_DB.pdf for the database diagram.
+    
     b. The credentials.py file can be edited for each user access to its server.
+
 
 2) Run wikiloc_scraper.py with the following command line arguments:
 
