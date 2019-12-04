@@ -75,9 +75,9 @@ def get_parser():
     parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
 
     parser.add_argument('-c', '--cat_int', type=int, choices=range(1, len(cfg.CATEGORIES)+2),
-                        metavar="category to scrape int", default=2,
+                        metavar="category to scrape int",
                         help="{{choose by number\n" +
-                             "; ".join([str(i) + ': ' + name for i, name in enumerate(cfg.CAT_NAMES)]) + '}}')
+                             "; ".join([str(i + 1) + ': ' + name for i, name in enumerate(cfg.CAT_NAMES)]) + '}}')
     parser.add_argument('-C', '--cat_str', type=str.lower, choices=cfg.CAT_NAMES,
                         metavar="category to scrape string",
                         help=f"{{{'choose by name' + ' ; '.join(cfg.CAT_NAMES)}}}")
@@ -104,8 +104,10 @@ def parse_handler(args):
         if args.cat_int:
             cat_to_scrape = [cfg.CATEGORIES[args.cat_int]]
         elif args.cat_str:
-            cat_indices = cfg.CAT_NAMES.index(args.cat_str)
+            cat_indices = cfg.CAT_NAMES.index(args.cat_str) + 1
             cat_to_scrape = [cfg.CATEGORIES[cat_indices]]
+        else:
+            cat_to_scrape = [cfg.CATEGORIES[2]]  # Choose Hiking category by default
 
         try:
             if args.r:

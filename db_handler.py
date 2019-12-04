@@ -119,7 +119,7 @@ def insert_into_db(trails_data):
             for trail_data in trails_data:
                 # get the category id and user id:
                 try:
-                    category_id = cfg.CAT_NAMES.index(trail_data['category'].lower())
+                    category_id = cfg.CAT_NAMES.index(trail_data['category'].lower()) + 1
                 except ValueError:
                     print(f"{trail_data['id']} category {trail_data['category']} does not match category list)")
                     category_id = None
