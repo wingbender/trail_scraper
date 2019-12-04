@@ -5,26 +5,30 @@ Web scraper to extract trails from www.wikiloc.com
 ## Getting Started
 
 This python program will help you extract all the trails from your favorite category on wikiloc.com
-simply download the files and run wikiloc_scraper.py with command line arguments described below
+into an MySQL database. Simply download the files and run wikiloc_scraper.py with command line arguments.
 
 ### Prerequisites
 
-You'll need python 3.6 with "requests", "BeautifulSoup" and "re" to run this functions.
+You'll need python 3.6 with "requests", "BeautifulSoup", "re" and "pymysql" to run these functions.
 
 
 ## Using the program
-after downloading, run wikiloc_scraper.py with the following command line arguments:
+1) Run the create_db.py file in order to create locally a MySQL database.
+see trail_DB.pdf for the database diagram.
 
-[-h] : show help message  
-[-c category to scrape int]: category to scrape by number  
-[-C category to scrape string]: category to scrape by name  
-[-r trails range]: range of trails to scrape e.g.: '14-76'  
-[-FF]: scrape the entire site. if this flag is passed all others will be ignored  
+2) Run wikiloc_scraper.py with the following command line arguments:
+
+    [-h] : show help message
+    [-c category to scrape int]: category to scrape by number
+    [-C category to scrape string]: category to scrape by name
+    [-r trails range]: range of trails to scrape e.g.: '14-76'
+    [-f]: extracts the max number of trails from a category
+    [-FF]: scrape the entire site. if this flag is passed all others will be ignored
 
 
-for example: 
+For example: 
   wikiloc_scraper.py -c 4 -r 5-50
-  will extract trails 5 through 50 from the 4th category (Hiking trails)
+  Will extract trails 5 through 50 from the 5th category (trail running)
 
 ## Authors
 
