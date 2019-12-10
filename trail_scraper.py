@@ -45,6 +45,12 @@ def extract_trail_data(trail_page):
     # country and trail category
     country_category_container = trail_soup.find('div', attrs={'class': "crumbs display"})
     trail_data['category'] = country_category_container.find("strong").text
+    near_text = trail_soup.find('div', attrs={'class':'trail-near'}).p.text
+    match = re.search(cfg.NEAR_TEXT_REGEX, near_text.split('\xa0')[1])
+    if match:
+        trail_data['near_place'] = match.group('place')
+        trail_data['near_area'] = match.group('area')
+        trail_data['near_country'] = match.group('country')
     country = country_category_container.find("span")
     if country is not None:
         trail_data['country'] = country.text.split(' ')[-1]
@@ -89,7 +95,8 @@ def convert_values(trail_data):
                           'Elevation gain downhill', 'Elevation min']
     time_attributes = ['Time', 'Moving time']
     date_attributes = ['Uploaded', 'Recorded']
-    id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id', 'url']
+    id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id', 'url', 'near_place', 'near_area',
+                     'near_country']
 
     for attribute, value in trail_data.items():
 

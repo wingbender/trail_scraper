@@ -22,7 +22,10 @@ CREATE TABLE `trails` (
   `uploaded` TEXT,
   `recorded` TEXT,
   `n_coords` INT,
-  `difficulty` INT
+  `difficulty` INT,
+  `near_place` TEXT,
+  `near_area` TEXT,
+  `near_country` TEXT
 );
 
 DROP TABLE IF EXISTS `categories`;

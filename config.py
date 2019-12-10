@@ -29,12 +29,16 @@ CONVERSION_DICT = {'feet': [0.3048, 'm'], 'miles': [1.6093, 'km'], 'nm': [1.852,
 DIFFICULTY_LEVELS = {'Easy': 1, 'Moderate': 2, 'Difficult': 3, 'Very difficult': 4, 'Experts only': 5}
 HOURS_IN_DAY = 24
 MINUTES_IN_HOUR = 60
+
 # List of the attributes extracted per trail and their units
 UNITS_MASTER = {'id': None, 'title': None, 'url': None, 'user_name': None, 'user_id': None, 'category': None,
                 'country': None, 'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
                 'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
                 'Uploaded': 'YYYY-MM-DD', 'Recorded': 'YYYY-MM-DD', 'No of coordinates': None,
-                'Moving time': 'minutes', 'Technical difficulty': None}
+                'Moving time': 'minutes', 'Technical difficulty': None, 'place': None, 'area': None, 'country': None}
+
+NEAR_TEXT_REGEX = r"(?P<place>[^,]*), (?P<area>[^(]*) \((?P<country>[^)]*)\)"
+
 
 CATEGORIES = {1: ('mountain biking', 'https://www.wikiloc.com/trails/mountain-biking'),
               2: ('hiking', 'https://www.wikiloc.com/trails/hiking'),
@@ -142,4 +146,8 @@ TRAIL_TO_DB_FIELDS_trails={
     'Recorded': 'recorded',
     'No of coordinates': 'n_coords',
     'Moving time': 'moving_time',
-    'Technical difficulty': 'difficulty'}
+    'Technical difficulty': 'difficulty',
+    'near_place': 'near_place',
+    'near_area': 'near_area',
+    'near_country': 'near_country'
+}
