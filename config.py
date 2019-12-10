@@ -35,7 +35,8 @@ UNITS_MASTER = {'id': None, 'title': None, 'url': None, 'user_name': None, 'user
                 'country': None, 'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
                 'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
                 'Uploaded': 'YYYY-MM-DD', 'Recorded': 'YYYY-MM-DD', 'No of coordinates': None,
-                'Moving time': 'minutes', 'Technical difficulty': None, 'place': None, 'area': None, 'country': None}
+                'Moving time': 'minutes', 'Technical difficulty': None, 'place': None, 'area': None, 'country': None,
+                'start_lat': None, 'start_lon': None}
 
 NEAR_TEXT_REGEX = r"(?P<place>[^,]*), (?P<area>[^(]*) \((?P<country>[^)]*)\)"
 
@@ -149,5 +150,7 @@ TRAIL_TO_DB_FIELDS_trails={
     'Technical difficulty': 'difficulty',
     'near_place': 'near_place',
     'near_area': 'near_area',
-    'near_country': 'near_country'
+    'near_country': 'near_country',
+    'start_lat' : 'start_lat',
+    'start_lon' : 'start_lon'
 }

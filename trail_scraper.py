@@ -51,6 +51,12 @@ def extract_trail_data(trail_page):
         trail_data['near_place'] = match.group('place')
         trail_data['near_area'] = match.group('area')
         trail_data['near_country'] = match.group('country')
+
+    lat, lon = trail_soup.find('input', attrs={'id': 'end-direction'})['value'].split(',')
+    trail_data['start_lat'] = float(lat)
+    trail_data['start_lon'] = float(lon)
+    # TODO insert lat and lon to the database
+
     country = country_category_container.find("span")
     if country is not None:
         trail_data['country'] = country.text.split(' ')[-1]
@@ -92,11 +98,11 @@ def convert_values(trail_data):
     # Division of attributes to different handling cases
     bool_attributes = ['Ends at start point (loop)']
     numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
-                          'Elevation gain downhill', 'Elevation min']
+                          'Elevation gain downhill', 'Elevation min', ]
     time_attributes = ['Time', 'Moving time']
     date_attributes = ['Uploaded', 'Recorded']
     id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id', 'url', 'near_place', 'near_area',
-                     'near_country']
+                     'near_country', 'start_lat', 'start_lon']
 
     for attribute, value in trail_data.items():
 
