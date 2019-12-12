@@ -153,5 +153,6 @@ TRAIL_TO_DB_FIELDS_trails={
     'near_area': 'near_area',
     'near_country': 'near_country',
     'start_lat' : 'start_lat',
-    'start_lon' : 'start_lon'
+    'start_lon' : 'start_lon',
+    'photo_urls': 'photo_urls'
 }
