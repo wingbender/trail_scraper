@@ -204,6 +204,11 @@ def main():
                     else:
                         trail_http_errors = 1
                 #TODO: add global timeout if needed (maybe debugging?)
+            if cfg.GET_TRAIL_PHOTOS:
+                for trail_data in trails_data:
+                    flickr = Flickr()
+                    trail_data['photo_urls'] = flickr.get_photo_urls(lat=trail_data['start_lat'],
+                                                                     lon=trail_data['start_lon'])
             if cfg.SAVE_TRAIL_DATA and len(trails_data)> 0 :
                 inserted, inserted_details = db_handler.insert_into_db(trails_data)
                 print(f'{inserted} commited to database')

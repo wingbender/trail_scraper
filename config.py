@@ -6,6 +6,7 @@
 SAVE_TRAIL_DATA = True
 PRINT_TRAIL_DATA = False
 UPDATE_TRAILS = False
+GET_TRAIL_PHOTOS = False
 
 DB_FILENAME = 'trails'
 
