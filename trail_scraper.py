@@ -17,9 +17,15 @@ def get_trail(trail_page_url):
     :param trail_page_url:
     :return: dict trail_data
     """
-    trail_page = get_page(trail_page_url)
-    trail_data = extract_trail_data(trail_page)
-    trail_data = convert_values(trail_data)
+    try:
+        trail_page = get_page(trail_page_url)
+        trail_data = extract_trail_data(trail_page)
+        trail_data = convert_values(trail_data)
+    except:
+        print(f'Failed getting trail from url {trail_page_url}, retrying...')
+        trail_page = get_page(trail_page_url)
+        trail_data = extract_trail_data(trail_page)
+        trail_data = convert_values(trail_data)
     return trail_data
 
 
@@ -46,6 +52,7 @@ def extract_trail_data(trail_page):
     country_category_container = trail_soup.find('div', attrs={'class': "crumbs display"})
     trail_data['category'] = country_category_container.find("strong").text
     near_text = trail_soup.find('div', attrs={'class':'trail-near'}).p.text
+
     match = re.search(cfg.NEAR_TEXT_REGEX, near_text.split('\xa0')[1])
     if match:
         trail_data['near_place'] = match.group('place')
@@ -55,7 +62,6 @@ def extract_trail_data(trail_page):
     lat, lon = trail_soup.find('input', attrs={'id': 'end-direction'})['value'].split(',')
     trail_data['start_lat'] = float(lat)
     trail_data['start_lon'] = float(lon)
-    # TODO insert lat and lon to the database
 
     country = country_category_container.find("span")
     if country is not None:

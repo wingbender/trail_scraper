@@ -23,6 +23,7 @@ import config as cfg
 import sys
 import db_handler
 import credentials
+from flickrAPI import Flickr
 import time
 
 # TODO: add logging
@@ -178,7 +179,7 @@ def main():
                     # save data
                     if cfg.SAVE_TRAIL_DATA:
                         trails_data.append(trail_data)
-                    print(f'\nextracted so far: {extracted_trails_counter}')
+                    print(f'\nextracted so far: {extracted_trails_counter}, last extracted {trail_id}')
                 except ValueError as ve:
                     print(f'Value error while processing trail {trail_id}-{trail_urls[trail_id][1]}')
                     print(ve)
@@ -204,12 +205,13 @@ def main():
                     else:
                         trail_http_errors = 1
                 #TODO: add global timeout if needed (maybe debugging?)
-            if cfg.GET_TRAIL_PHOTOS:
+            if cfg.GET_TRAIL_PHOTOS and len(trails_data) > 0:
+                flickr = Flickr()
                 for trail_data in trails_data:
-                    flickr = Flickr()
-                    trail_data['photo_urls'] = flickr.get_photo_urls(lat=trail_data['start_lat'],
-                                                                     lon=trail_data['start_lon'])
-            if cfg.SAVE_TRAIL_DATA and len(trails_data)> 0 :
+                    photo_urls = flickr.get_photos_url(lat=trail_data['start_lat'], lon=trail_data['start_lon'])
+                    trail_data['photo_urls'] = photo_urls
+                    print(f'extracted {len(photo_urls)} photos for trail {trail_id}')
+            if cfg.SAVE_TRAIL_DATA and len(trails_data)> 0:
                 inserted, inserted_details = db_handler.insert_into_db(trails_data)
                 print(f'{inserted} commited to database')
                 committed_wikiloc_ids, _ = zip(*inserted_details)

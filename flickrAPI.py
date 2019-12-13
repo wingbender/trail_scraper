@@ -7,7 +7,7 @@ import json
 import requests
 
 
-class FLICKR():
+class Flickr():
     def __init__(self, method='photos.search', geo_context=2,):
         self.api_key = 'b21cb88140f105550d356495c1f37cc7'
         self.flickr_url = 'https://www.flickr.com/services/rest/'
