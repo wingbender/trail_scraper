@@ -23,7 +23,7 @@ class Flickr():
 
     def __get_urls_from_json(self, data):
         if data['photos']['total'] == '0':
-            print(f"No photos were found on Flickr in {self.params['radius']} from the trail location")
+            print(f"No photos were found on Flickr in {self.params['radius']} km from the trail location")
             return ''
         else:
             urls = []
@@ -46,7 +46,7 @@ class Flickr():
 
 def test():
     lat, lon = 31.455977, 35.383519  # Ein - Gedi coordinates
-    f = FLICKR()
+    f = Flickr()
     flickr_urls = f.get_photos_url(lat, lon)
     print('------------------')
     print('\n'.join(flickr_urls))

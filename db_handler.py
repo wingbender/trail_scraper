@@ -53,7 +53,7 @@ def create_user(wikiloc_user_id, wikiloc_user_name):
         with connection.cursor() as cursor:
             command = f''' 
             INSERT INTO users(wikiloc_user_id, user_name)
-            VALUES ('{wikiloc_user_id}', '{wikiloc_user_name}');
+            VALUES ('{wikiloc_user_id}', '{pymysql.escape_string(wikiloc_user_name)}');
             '''
             res = cursor.execute(command)
             connection.commit()

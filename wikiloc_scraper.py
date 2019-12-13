@@ -210,7 +210,7 @@ def main():
                 for trail_data in trails_data:
                     photo_urls = flickr.get_photos_url(lat=trail_data['start_lat'], lon=trail_data['start_lon'])
                     trail_data['photo_urls'] = photo_urls
-                    print(f'extracted {len(photo_urls)} photos for trail {trail_id}')
+                    print(f'extracted {len(photo_urls)} photos for trail {trail_data["id"]}')
             if cfg.SAVE_TRAIL_DATA and len(trails_data)> 0:
                 inserted, inserted_details = db_handler.insert_into_db(trails_data)
                 print(f'{inserted} commited to database')
