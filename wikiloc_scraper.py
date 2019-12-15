@@ -68,74 +68,69 @@ def get_trails_urls(category, range_limits):
     return trails_url_dict
 
 
-def get_parser():
-    """
-    an argument parser to parse arguments: -C category -c category number(s)
-    :return:
-    """
-    parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
+class ArgParser:
+    """ Class of argument parser functions """
+    def __init__(self):
+        self.parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
 
-    parser.add_argument('-c', '--cat_int', type=int, choices=range(1, len(cfg.CATEGORIES)+2),
-                        metavar="category to scrape int",
-                        help="{{choose by number\n" +
-                             "; ".join([str(i + 1) + ': ' + name for i, name in enumerate(cfg.CAT_NAMES)]) + '}}')
-    parser.add_argument('-C', '--cat_str', type=str.lower, choices=cfg.CAT_NAMES,
-                        metavar="category to scrape string",
-                        help=f"{{{'choose by name' + ' ; '.join(cfg.CAT_NAMES)}}}")
-    parser.add_argument('-r', type=str, help="range of trails to extract, dash separated e.g. '0-100'",
-                        metavar='trails range')
-    parser.add_argument('-f', help='This will extract all available trails from the chosen category',
-                        action='store_true')
-    parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
-                        action='store_true')
-    # TODO: make country arg work
-    # parser.add_argument('--country', metavar="country to scrape", help="choose by country name")
+        self.parser.add_argument('-c', '--cat_int', type=int, choices=range(1, len(cfg.CATEGORIES) + 2),
+                            metavar="category to scrape int",
+                            help="{{choose by number\n" +
+                                 "; ".join([str(i + 1) + ': ' + name for i, name in enumerate(cfg.CAT_NAMES)]) + '}}')
+        self.parser.add_argument('-C', '--cat_str', type=str.lower, choices=cfg.CAT_NAMES,
+                            metavar="category to scrape string",
+                            help=f"{{{'choose by name' + ' ; '.join(cfg.CAT_NAMES)}}}")
+        self.parser.add_argument('-r', type=str, help="range of trails to extract, dash separated e.g. '0-100'",
+                            metavar='trails range')
+        self.parser.add_argument('-f', help='This will extract all available trails from the chosen category',
+                            action='store_true')
+        self.parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
+                            action='store_true')
+        self.parser.add_argument('-p', '--get_photos',
+                            help='Enter the number of photos to extract from Flickr API. Default 5',
+                            metavar='no. of photos to extract', default=5)
+        # TODO: make country arg work
+        # self.parser.add_argument('--country', metavar="country to scrape", help="choose by country name")
 
-    return parser
-
-
-def parse_handler(args):
-    """ Function to handle the argument parser results
-    :return: cat_to_scrape = list of category tuples of (name, url), range_list = tuple of range limits
-    """
-    if args.extract_all:
-        cat_to_scrape = [(name, url) for name, url in cfg.CATEGORIES.values()]
-        range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
-    else:
-        if args.cat_int:
-            cat_to_scrape = [cfg.CATEGORIES[args.cat_int]]
-        elif args.cat_str:
-            cat_indices = cfg.CAT_NAMES.index(args.cat_str) + 1
-            cat_to_scrape = [cfg.CATEGORIES[cat_indices]]
+    def parse_handler(self, args):
+        """ Function to handle the argument parser results """
+        if args.extract_all:
+            cat_to_scrape = [(name, url) for name, url in cfg.CATEGORIES.values()]
+            range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
         else:
-            cat_to_scrape = [cfg.CATEGORIES[2]]  # Choose Hiking category by default
-
-        try:
-            if args.r:
-                range_list = parse_range(args.r)
-            elif args.f:
-                range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
+            if args.cat_int:
+                cat_to_scrape = [cfg.CATEGORIES[args.cat_int]]
+            elif args.cat_str:
+                cat_indices = cfg.CAT_NAMES.index(args.cat_str) + 1
+                cat_to_scrape = [cfg.CATEGORIES[cat_indices]]
             else:
-                range_list = (0, cfg.DEFAULT_TRAIL_RANGE)
-        except ValueError:
-            print('Could not parse your requested range, please use numbers and dashes: e.g. "2-86" ')
-            print(ValueError)
-            return
+                cat_to_scrape = [cfg.CATEGORIES[2]]  # Choose Hiking category by default
 
-    return cat_to_scrape, range_list
+            try:
+                if args.r:
+                    range_list = self.__parse_range(args.r)
+                elif args.f:
+                    range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
+                else:
+                    range_list = (0, cfg.DEFAULT_TRAIL_RANGE)
+            except ValueError:
+                print('Could not parse your requested range, please use numbers and dashes: e.g. "2-86" ')
+                print(ValueError)
+                return
 
+        return cat_to_scrape, range_list
 
-def parse_range(r):
-    """ Function to parse range list string. e.g. "1-10" -> return tuple (0, 100)"""
-    if not r:
-        return []
-    parts = r.split("-")
-    if len(parts) == 1:  # if given 1 value, take range from 0->value
-        return 0, int(r)
-    elif len(parts) == 2:
-        return int(parts[0]), int(parts[1])
-    if len(parts) > 2:
-        raise ValueError("Invalid range: {}".format(r))
+    def __parse_range(self, r):
+        """ Function to parse range list string. e.g. "1-10" -> return tuple (0, 100)"""
+        if not r:
+            return []
+        parts = r.split("-")
+        if len(parts) == 1:  # if given 1 value, take range from 0->value
+            return 0, int(r)
+        elif len(parts) == 2:
+            return int(parts[0]), int(parts[1])
+        if len(parts) > 2:
+            raise ValueError("Invalid range: {}".format(r))
 
 
 def main():
