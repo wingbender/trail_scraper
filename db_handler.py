@@ -107,7 +107,6 @@ def build_insert_command(trail_data, category_id, user_id):
         if dat not in trail_data.keys():
             continue
         if dat == 'user_id':
-            # TODO: maybe delete this attribute from the dictionary
             continue
         # Converting 'Technical difficulty' to INT for the database
         if dat.lower() == 'technical difficulty':
@@ -167,7 +166,6 @@ def insert_into_db(trails_data):
         print(f'Failed executing command: {command}\n Exception string:{e}')
     finally:
         connection.close()
-
     # TODO: implement updating if the trail already exists
 
 

@@ -159,6 +159,7 @@ def main():
             except Exception as e:
                 print(f"Reached the end of category '{cat_name}'")
                 break
+
             existing_trail_ids = db_handler.check_trails_in_db(trail_urls.keys())
             if existing_trail_ids is not None and len(existing_trail_ids) > 0:
                 extracted_wikiloc_ids,_ = zip(*existing_trail_ids)
@@ -172,10 +173,12 @@ def main():
                     url = trail_urls[trail_id][1]
                     trail_data = get_trail(url)
                     extracted_trails_counter += 1
+
                     # for now print data to screen
                     if cfg.PRINT_TRAIL_DATA:
                         print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
                         print('---------------------------------------------\n')
+
                     # save data
                     if cfg.SAVE_TRAIL_DATA:
                         trails_data.append(trail_data)
@@ -204,7 +207,6 @@ def main():
                             return
                     else:
                         trail_http_errors = 1
-                #TODO: add global timeout if needed (maybe debugging?)
             if cfg.GET_TRAIL_PHOTOS and len(trails_data) > 0:
                 flickr = Flickr()
                 for trail_data in trails_data:
@@ -213,7 +215,7 @@ def main():
                     print(f'extracted {len(photo_urls)} photos for trail {trail_data["id"]}')
             if cfg.SAVE_TRAIL_DATA and len(trails_data)> 0:
                 inserted, inserted_details = db_handler.insert_into_db(trails_data)
-                print(f'{inserted} commited to database')
+                print(f'{inserted} committed to database')
                 committed_wikiloc_ids, _ = zip(*inserted_details)
                 for trail_id in trail_urls.keys():
                     if trail_id not in committed_wikiloc_ids:
