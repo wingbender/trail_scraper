@@ -12,19 +12,19 @@
     [-r trails range]: range of trails to scrape e.g.: '14-76'
     [-f]: extracts the max number of trails from a category
     [-FF]: scrape the entire site. if this flag is passed all others will be ignored
+    [-p]: Enter the number of photos to extract from Flickr API. Default 5
     """
 
 import requests
 from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
 from trail_scraper import get_trail
-import argparse
 import config as cfg
 import sys
 import db_handler
 import credentials
 from flickrAPI import Flickr
-import time
+from argparser import ArgParser
 
 # TODO: add logging
 # TODO: add testing
@@ -68,79 +68,16 @@ def get_trails_urls(category, range_limits):
     return trails_url_dict
 
 
-class ArgParser:
-    """ Class of argument parser functions """
-    def __init__(self):
-        self.parser = argparse.ArgumentParser(description='Wikiloc.com scraper')
-
-        self.parser.add_argument('-c', '--cat_int', type=int, choices=range(1, len(cfg.CATEGORIES) + 2),
-                            metavar="category to scrape int",
-                            help="{{choose by number\n" +
-                                 "; ".join([str(i + 1) + ': ' + name for i, name in enumerate(cfg.CAT_NAMES)]) + '}}')
-        self.parser.add_argument('-C', '--cat_str', type=str.lower, choices=cfg.CAT_NAMES,
-                            metavar="category to scrape string",
-                            help=f"{{{'choose by name' + ' ; '.join(cfg.CAT_NAMES)}}}")
-        self.parser.add_argument('-r', type=str, help="range of trails to extract, dash separated e.g. '0-100'",
-                            metavar='trails range')
-        self.parser.add_argument('-f', help='This will extract all available trails from the chosen category',
-                            action='store_true')
-        self.parser.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
-                            action='store_true')
-        self.parser.add_argument('-p', '--get_photos',
-                            help='Enter the number of photos to extract from Flickr API. Default 5',
-                            metavar='no. of photos to extract', default=5)
-        # TODO: make country arg work
-        # self.parser.add_argument('--country', metavar="country to scrape", help="choose by country name")
-
-    def parse_handler(self, args):
-        """ Function to handle the argument parser results """
-        if args.extract_all:
-            cat_to_scrape = [(name, url) for name, url in cfg.CATEGORIES.values()]
-            range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
-        else:
-            if args.cat_int:
-                cat_to_scrape = [cfg.CATEGORIES[args.cat_int]]
-            elif args.cat_str:
-                cat_indices = cfg.CAT_NAMES.index(args.cat_str) + 1
-                cat_to_scrape = [cfg.CATEGORIES[cat_indices]]
-            else:
-                cat_to_scrape = [cfg.CATEGORIES[2]]  # Choose Hiking category by default
-
-            try:
-                if args.r:
-                    range_list = self.__parse_range(args.r)
-                elif args.f:
-                    range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
-                else:
-                    range_list = (0, cfg.DEFAULT_TRAIL_RANGE)
-            except ValueError:
-                print('Could not parse your requested range, please use numbers and dashes: e.g. "2-86" ')
-                print(ValueError)
-                return
-
-        return cat_to_scrape, range_list
-
-    def __parse_range(self, r):
-        """ Function to parse range list string. e.g. "1-10" -> return tuple (0, 100)"""
-        if not r:
-            return []
-        parts = r.split("-")
-        if len(parts) == 1:  # if given 1 value, take range from 0->value
-            return 0, int(r)
-        elif len(parts) == 2:
-            return int(parts[0]), int(parts[1])
-        if len(parts) > 2:
-            raise ValueError("Invalid range: {}".format(r))
-
-
 def main():
     # categories_list = get_trail_categories()  # get new categories list of names and urls from website
-    args = get_parser().parse_args()
+
+    ap = ArgParser()
+    ap.get_args()
     if len(sys.argv) == 1:
-        print(get_parser().format_help())
+        print(ap.format_help())
         sys.exit()
 
-    cat_to_scrape, range_list = parse_handler(args)
+    cat_to_scrape, range_list = ap.parse_handler()
 
     extracted_trails_counter = 0
     if credentials.DB['password'] == '' and cfg.SAVE_TRAIL_DATA:
@@ -205,10 +142,10 @@ def main():
             if cfg.GET_TRAIL_PHOTOS and len(trails_data) > 0:
                 flickr = Flickr()
                 for trail_data in trails_data:
-                    photo_urls = flickr.get_photos_url(lat=trail_data['start_lat'], lon=trail_data['start_lon'])
+                    photo_urls = flickr.get_photos_url(lat=trail_data['start_lat'], lon=trail_data['start_lon'], no_of_photos=ap.args.p)
                     trail_data['photo_urls'] = photo_urls
                     print(f'extracted {len(photo_urls)} photos for trail {trail_data["id"]}')
-            if cfg.SAVE_TRAIL_DATA and len(trails_data)> 0:
+            if cfg.SAVE_TRAIL_DATA and len(trails_data) > 0:
                 inserted, inserted_details = db_handler.insert_into_db(trails_data)
                 print(f'{inserted} committed to database')
                 committed_wikiloc_ids, _ = zip(*inserted_details)
