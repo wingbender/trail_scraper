@@ -1,6 +1,6 @@
 # Trail Scraper
 
-Web scraper to extract trails from www.wikiloc.com
+Web scraper to extract trails from www.wikiloc.com and find nearby images from www.Flickr.com using their API.
 
 ## Getting Started
 
@@ -33,11 +33,15 @@ You'll need python 3.6 with "requests", "BeautifulSoup", "re" and "pymysql" to r
     [-f]: extracts the max number of trails from a category
     
     [-FF]: scrape the entire site. if this flag is passed all others will be ignored
+    
+    [-p]: Enter the number of photos to extract from Flickr API. Default is 5
+
 
 
 For example: 
-  wikiloc_scraper.py -c 4 -r 5-50
-  Will extract trails 5 through 50 from the 5th category (trail running)
+  wikiloc_scraper.py -c 1 -r 5-50 -p 5
+  Will extract trails 5 through 50 from the 1th category (mountain biking) and 5 nearby photos from Flickr
+
 
 ## Authors
 
