@@ -50,26 +50,24 @@ def extract_trail_data(trail_page):
     trail_data['user_id'] = int(user_id_container['href'].split('=')[-1])
 
     # country and trail category
-    country_category_container = trail_soup.find('div', attrs={'class': "crumbs display"})
-    trail_data['category'] = country_category_container.find("strong").text
+    # country_category_container = trail_soup.find('div', attrs={'class': "crumbs display"})
+    # trail_data['category'] = country_category_container.find("strong").text
+    trail_data['category'] = trail_soup.find('div', attrs={'class': "crumbs display"}).find("strong").text
 
     # near place, region, country container
     near_container = trail_soup.find('div', attrs={'class': 'trail-near'})
     if not near_container.p:
-        print(f"Can't find 'Near' string for trail {trail_id}, fill with 'None' 'Place' and 'Region'")
-        country = country_category_container.find("span")
-        if not country:
-            print(f"Can't find 'Country' string for trail {trail_id}, fill with 'None'")
-        else:
-            trail_data['country'] = country.text.split(' ')[-1]
+        print(f"Can't find 'Near' string for trail {trail_id}, fill with 'None' 'Place', 'Region' and 'country'")
 
     else:
         near_text = near_container.p.text
         match = re.search(cfg.NEAR_TEXT_REGEX, near_text.split('\xa0')[1])
-        trail_data['near_place'] = match.group('place')
-        trail_data['region'] = match.group('region')
-        trail_data['country'] = match.group('country')
-
+        if match:
+            trail_data['near_place'] = match.group('place')
+            trail_data['region'] = match.group('region')
+            trail_data['country'] = match.group('country')
+        else:
+            print(f"Can't find 'Near' string for trail {trail_id}, fill with 'None' 'Place', 'Region' and 'country'")
 
     lat, lon = trail_soup.find('input', attrs={'id': 'end-direction'})['value'].split(',')
     trail_data['start_lat'] = float(lat)
