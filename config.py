@@ -33,13 +33,13 @@ MINUTES_IN_HOUR = 60
 
 # List of the attributes extracted per trail and their units
 UNITS_MASTER = {'id': None, 'title': None, 'url': None, 'user_name': None, 'user_id': None, 'category': None,
-                'country': None, 'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
+                'Distance': 'km', 'Ends at start point (loop)': 'bool', 'Elevation gain uphill': 'm',
                 'Elevation max': 'm', 'Elevation gain downhill': 'm', 'Elevation min': 'm', 'Time': 'minutes',
                 'Uploaded': 'YYYY-MM-DD', 'Recorded': 'YYYY-MM-DD', 'No of coordinates': None,
-                'Moving time': 'minutes', 'Technical difficulty': None, 'place': None, 'area': None, 'country': None,
+                'Moving time': 'minutes', 'Technical difficulty': None, 'place': None, 'region': None, 'country': None,
                 'start_lat': None, 'start_lon': None}
 
-NEAR_TEXT_REGEX = r"(?P<place>[^,]*), (?P<area>[^(]*) \((?P<country>[^)]*)\)"
+NEAR_TEXT_REGEX = r"(?P<place>[^,]*), (?P<region>[^(]*) \((?P<country>[^)]*)\)"
 
 
 CATEGORIES = {1: ('mountain biking', 'https://www.wikiloc.com/trails/mountain-biking'),
@@ -136,7 +136,6 @@ TRAIL_TO_DB_FIELDS_trails={
     'title': 'title',
     'url': 'url',
     'user_id': 'user_id',
-    'country': 'country',
     'Distance': 'distance',
     'Ends at start point (loop)': 'is_loop',
     'Elevation gain uphill': 'elevation_gain',
@@ -150,8 +149,8 @@ TRAIL_TO_DB_FIELDS_trails={
     'Moving time': 'moving_time',
     'Technical difficulty': 'difficulty',
     'near_place': 'near_place',
-    'near_area': 'near_area',
-    'near_country': 'near_country',
+    'region': 'region',
+    'country': 'country',
     'start_lat' : 'start_lat',
     'start_lon' : 'start_lon',
     'photo_urls': 'photo_urls'

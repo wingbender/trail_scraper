@@ -43,31 +43,39 @@ def extract_trail_data(trail_page):
     trail_data['id'] = trail_id
     trail_data['title'] = trail_soup.find('h1').text.strip()
     trail_data['url'] = trail_page.url
+
     # user name and id
     user_id_container = trail_soup.find('a', attrs={"class": "user-image"})
     trail_data['user_name'] = user_id_container['title']
     trail_data['user_id'] = int(user_id_container['href'].split('=')[-1])
-    title_container = trail_soup.find('h1')
+
     # country and trail category
     country_category_container = trail_soup.find('div', attrs={'class': "crumbs display"})
     trail_data['category'] = country_category_container.find("strong").text
-    try:
-        near_text = trail_soup.find('div', attrs={'class':'trail-near'}).p.text
+
+    # near place, region, country container
+    near_container = trail_soup.find('div', attrs={'class': 'trail-near'})
+    if not near_container.p:
+        print(f"Can't find 'Near' string for trail {trail_id}, fill with 'None' 'Place' and 'Region'")
+        country = country_category_container.find("span")
+        if not country:
+            print(f"Can't find 'Country' string for trail {trail_id}, fill with 'None'")
+        else:
+            trail_data['country'] = country.text.split(' ')[-1]
+
+    else:
+        near_text = near_container.p.text
         match = re.search(cfg.NEAR_TEXT_REGEX, near_text.split('\xa0')[1])
-        if match:
-            trail_data['near_place'] = match.group('place')
-            trail_data['near_area'] = match.group('area')
-            trail_data['near_country'] = match.group('country')
-    except:
-        print(f"Can't find 'Near' string for trail {trail_id}, continue without")
+        trail_data['near_place'] = match.group('place')
+        trail_data['region'] = match.group('region')
+        trail_data['country'] = match.group('country')
+
 
     lat, lon = trail_soup.find('input', attrs={'id': 'end-direction'})['value'].split(',')
     trail_data['start_lat'] = float(lat)
     trail_data['start_lon'] = float(lon)
 
-    country = country_category_container.find("span")
-    if country is not None:
-        trail_data['country'] = country.text.split(' ')[-1]
+
     # get trail data
     trail_data_container = trail_soup.find(id="trail-data")
     for hyperlink in trail_data_container.find_all('a', href=True, title=True):

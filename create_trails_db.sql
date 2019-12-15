@@ -10,7 +10,6 @@ CREATE TABLE `trails` (
   `url` TEXT,
   `user_id` INT,
   `category_id` INT,
-  `country` TEXT,
   `distance` FLOAT,
   `is_loop` BOOL,
   `elevation_gain` FLOAT,
@@ -24,8 +23,8 @@ CREATE TABLE `trails` (
   `n_coords` INT,
   `difficulty` INT,
   `near_place` TEXT,
-  `near_area` TEXT,
-  `near_country` TEXT,
+  `region` TEXT,
+  `country` TEXT,
   `start_lat` DOUBLE,
   `start_lon` DOUBLE,
   `photo_urls` TEXT
