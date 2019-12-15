@@ -27,7 +27,8 @@ CREATE TABLE `trails` (
   `near_area` TEXT,
   `near_country` TEXT,
   `start_lat` DOUBLE,
-  `start_lon` DOUBLE
+  `start_lon` DOUBLE,
+  `photo_urls` TEXT
 );
 
 DROP TABLE IF EXISTS `categories`;

@@ -6,6 +6,7 @@
 SAVE_TRAIL_DATA = True
 PRINT_TRAIL_DATA = False
 UPDATE_TRAILS = False
+GET_TRAIL_PHOTOS = True
 
 DB_FILENAME = 'trails'
 
@@ -152,5 +153,6 @@ TRAIL_TO_DB_FIELDS_trails={
     'near_area': 'near_area',
     'near_country': 'near_country',
     'start_lat' : 'start_lat',
-    'start_lon' : 'start_lon'
+    'start_lon' : 'start_lon',
+    'photo_urls': 'photo_urls'
 }

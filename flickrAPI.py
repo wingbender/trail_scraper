@@ -7,7 +7,7 @@ import json
 import requests
 
 
-class FLICKR():
+class Flickr():
     def __init__(self, method='photos.search', geo_context=2,):
         self.api_key = 'b21cb88140f105550d356495c1f37cc7'
         self.flickr_url = 'https://www.flickr.com/services/rest/'
@@ -23,7 +23,7 @@ class FLICKR():
 
     def __get_urls_from_json(self, data):
         if data['photos']['total'] == '0':
-            print(f"No photos were found on Flickr in {self.params['radius']} from the trail location")
+            print(f"No photos were found on Flickr in {self.params['radius']} km from the trail location")
             return ''
         else:
             urls = []
@@ -46,9 +46,7 @@ class FLICKR():
 
 def test():
     lat, lon = 31.455977, 35.383519  # Ein - Gedi coordinates
-    # lat, lon = 42.141482, -71.180563  # Sharon, MA coordinates
-
-    f = FLICKR()
+    f = Flickr()
     flickr_urls = f.get_photos_url(lat, lon)
     print('------------------')
     print('\n'.join(flickr_urls))

@@ -53,7 +53,7 @@ def create_user(wikiloc_user_id, wikiloc_user_name):
         with connection.cursor() as cursor:
             command = f''' 
             INSERT INTO users(wikiloc_user_id, user_name)
-            VALUES ('{wikiloc_user_id}', '{wikiloc_user_name}');
+            VALUES ('{wikiloc_user_id}', '{pymysql.escape_string(wikiloc_user_name)}');
             '''
             res = cursor.execute(command)
             connection.commit()
@@ -120,6 +120,8 @@ def build_insert_command(trail_data, category_id, user_id):
             command += str(trail_data[dat]) + ','
         elif type(trail_data[dat]) == bool:
             command += str(1 if trail_data[dat] else 0) + ','
+        elif type(trail_data[dat]) == list:
+            command += f"'{pymysql.escape_string(';'.join(pymysql.escape_string(li) for li in trail_data[dat]))}',"
         else:
             raise ValueError
     command += f'{category_id}, {user_id});'
