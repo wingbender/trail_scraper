@@ -112,13 +112,14 @@ def convert_values(trail_data):
     :return new_data dictionary, units dictionary """
     new_data = {}
     # Division of attributes to different handling cases
+    # TODO: integrate this to the config file
     bool_attributes = ['Ends at start point (loop)']
     numeric_attributes = ['Distance', 'Elevation gain uphill', 'Elevation max',
                           'Elevation gain downhill', 'Elevation min', ]
     time_attributes = ['Time', 'Moving time']
     date_attributes = ['Uploaded', 'Recorded']
-    id_attributes = ['id', 'title', 'category', 'country', 'user_name', 'user_id', 'url', 'near_place', 'near_area',
-                     'near_country', 'start_lat', 'start_lon']
+    id_attributes = ['id', 'title', 'category', 'user_name', 'user_id', 'url', 'near_place', 'region',
+                     'country', 'start_lat', 'start_lon']
 
     for attribute, value in trail_data.items():
 
