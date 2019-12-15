@@ -148,7 +148,7 @@ def main():
     cat_to_scrape, range_list = parse_handler(args)
 
     extracted_trails_counter = 0
-    if credentials.DB['password'] == '':
+    if credentials.DB['password'] == '' and cfg.SAVE_TRAIL_DATA:
         credentials.DB['password'] = input(f'DB password for user {credentials.DB["username"]}: ')
     for cat_name, cat_url in cat_to_scrape:
         print(f'getting urls from category: {cat_name}')
