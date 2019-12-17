@@ -39,7 +39,11 @@ class Flickr():
         self.params['radius'] = radius
         self.params['per_page'] = no_of_photos
         response = requests.request('GET', self.flickr_url, params=self.params)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except Exception as e:
+            print(f'Error connecting to Flickr\n')
+            print(e)
         data = json.loads(response.text)
         return self.__get_urls_from_json(data)
 

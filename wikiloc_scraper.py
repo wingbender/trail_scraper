@@ -148,7 +148,8 @@ def main():
             if cfg.SAVE_TRAIL_DATA and len(trails_data) > 0:
                 inserted, inserted_details = db_handler.insert_into_db(trails_data)
                 print(f'{inserted} committed to database')
-                committed_wikiloc_ids, _ = zip(*inserted_details)
+                if inserted is not 0:
+                    committed_wikiloc_ids, _ = zip(*inserted_details)
                 for trail_id in trail_urls.keys():
                     if trail_id not in committed_wikiloc_ids:
                         print(f'Trail {trail_id} was not committed to database, please check the log')
