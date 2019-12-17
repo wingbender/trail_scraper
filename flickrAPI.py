@@ -21,7 +21,7 @@ class Flickr():
                        'nojsoncallback': 1
                        }
 
-    def __get_urls_from_json(self, data):y
+    def __get_urls_from_json(self, data):
         if data['photos']['total'] == '0':
             print(f"No photos were found on Flickr in {self.params['radius']} km from the trail location")
             return ''
