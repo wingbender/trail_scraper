@@ -2,7 +2,7 @@
     using the create_trails_db.sql script
     -- Roi Weinberger & Sagiv Yaari -- Nov 2019 - ITC data science project """
 
-import pymysql.cursors
+import pymysql
 import credentials
 
 DB_CREATION_FILENAME = 'create_trails_db.sql'
