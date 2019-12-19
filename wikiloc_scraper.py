@@ -155,5 +155,11 @@ def main():
                         print(f'Trail {trail_id} was not committed to database, please check the log')
 
 
+def test():
+    url = 'https://www.wikiloc.com/running-trails/tp-bhandup-44546156'
+    trail_data = get_trail(url)
+    db_handler.insert_into_db([trail_data])
+
 if __name__ == '__main__':
-    main()
+    # main()
+    test()
