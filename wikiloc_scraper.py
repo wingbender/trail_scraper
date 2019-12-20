@@ -150,9 +150,11 @@ def main():
                 print(f'{inserted} committed to database')
                 if inserted is not 0:
                     committed_wikiloc_ids, _ = zip(*inserted_details)
-                for trail_id in trail_urls.keys():
-                    if trail_id not in committed_wikiloc_ids:
-                        print(f'Trail {trail_id} was not committed to database, please check the log')
+                    for trail_id in trail_urls.keys():
+                        if trail_id not in committed_wikiloc_ids:
+                            print(f'Trail {trail_id} was not committed to database, please check the log')
+                else:
+                    print(f'None committed to database')
 
 
 def test():
