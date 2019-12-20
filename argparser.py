@@ -13,7 +13,9 @@ class ArgParser(argparse.ArgumentParser):
                             metavar='trails range')
         self.add_argument('-f', help='This will extract all available trails from the chosen category',
                             action='store_true')
-        self.add_argument('-FF', '--extract_all', help='This will extract all available trails category by category',
+        self.add_argument('-FF', '--extract_all',
+                          help='This will extract all available trails category by category. \\'
+                               'if "category to scrape" is provided, will start from that category',
                             action='store_true')
         self.add_argument('-p', metavar='no. of photos to extract', type=int, default=5,
                             help='Enter the number of photos to extract from Flickr API. Defaults to 5')
@@ -35,7 +37,12 @@ class ArgParser(argparse.ArgumentParser):
     def parse_handler(self):
         """ Function to handle the argument parser results """
         if self.args.extract_all:
-            cat_to_scrape = [(name, url) for name, url in cfg.CATEGORIES.values()]
+            if self.args.cat_int:
+                start_cat_int = self.args.cat_int
+            elif self.args.cat_str:
+                cat_indices = cfg.CAT_NAMES.index(self.args.cat_str) + 1
+                start_cat_int = [cfg.CATEGORIES[cat_indices]]
+            cat_to_scrape = [(name, url) for name, url in cfg.CATEGORIES.values()][start_cat_int:]
             range_list = (0, cfg.MAX_TRAILS_IN_CATEGORY)
         else:
             if self.args.cat_int:

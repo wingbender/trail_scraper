@@ -161,5 +161,5 @@ def test():
     db_handler.insert_into_db([trail_data])
 
 if __name__ == '__main__':
-    # main()
-    test()
+    main()
+    # test()

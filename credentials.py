@@ -1,5 +1,5 @@
 DB = {
-    'username'  : 'roi',
+    'username'  : 'root',
     'password'  : '',
     'host'      : 'localhost',
-    'db'        : 'TRAILS'}
+    'db'        : 'trails'}
