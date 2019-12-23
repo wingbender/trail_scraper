@@ -21,7 +21,7 @@ from webfunctions import get_page
 from trail_scraper import TrailScraper
 import config as cfg
 import sys
-import db_handler
+from db_handler import DBHandler
 import credentials
 from flickrAPI import Flickr
 from argparser import ArgParser
@@ -80,8 +80,9 @@ def main():
     cat_to_scrape, range_list = ap.parse_handler()
 
     extracted_trails_counter = 0
-    if credentials.DB['password'] == '' and cfg.SAVE_TRAIL_DATA:
-        credentials.DB['password'] = input(f'DB password for user {credentials.DB["username"]}: ')
+    db_handle = DBHandler()
+    # if credentials.DB['password'] == '' and cfg.SAVE_TRAIL_DATA:
+    #     credentials.DB['password'] = input(f'DB password for user {credentials.DB["username"]}: ')
     for cat_name, cat_url in cat_to_scrape:
         print(f'getting urls from category: {cat_name}')
         for i in range(range_list[0], range_list[1], cfg.BATCH_SIZE):
@@ -92,7 +93,7 @@ def main():
                 print(f"Reached the end of category '{cat_name}'")
                 break
 
-            existing_trail_ids = db_handler.check_trails_in_db(trail_urls.keys())
+            existing_trail_ids = db_handle.check_trails_in_db(trail_urls.keys())
             if existing_trail_ids is not None and len(existing_trail_ids) > 0:
                 extracted_wikiloc_ids,_ = zip(*existing_trail_ids)
             else:
@@ -147,7 +148,7 @@ def main():
                     trail_data['photo_urls'] = photo_urls
                     print(f'extracted {len(photo_urls)} photos for trail {trail_data["id"]}')
             if cfg.SAVE_TRAIL_DATA and len(trails_data) > 0:
-                inserted, inserted_details = db_handler.insert_into_db(trails_data)
+                inserted, inserted_details = db_handle.insert_into_db(trails_data)
                 print(f'{inserted} committed to database')
                 if inserted is not 0:
                     committed_wikiloc_ids, _ = zip(*inserted_details)
@@ -162,7 +163,8 @@ def test():
     url = 'https://www.wikiloc.com/running-trails/tp-bhandup-44546156'
     trail_obj = TrailScraper()
     trail_data = trail_obj.get_trail(url)
-    db_handler.insert_into_db([trail_data])
+    db_handle = DBHandler()
+    db_handle.insert_into_db([trail_data])
 
 
 if __name__ == '__main__':
