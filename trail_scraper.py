@@ -78,15 +78,15 @@ class TrailScraper():
         # get trail data
         trail_data_container = trail_soup.find(id="trail-data")
         for hyperlink in trail_data_container.find_all('a', href=True, title=True):
-            attribute, value, units = process_trail_data_string(hyperlink['title'])
+            attribute, value, units = self._process_trail_data_string(hyperlink['title'])
             trail_data[attribute] = (value, units)
         for small_title in trail_data_container.find_all('h4'):
-            attribute, value, units = process_trail_data_string(small_title.text)
+            attribute, value, units = self._process_trail_data_string(small_title.text)
             trail_data[attribute] = (value, units)
 
         self.trail_data = trail_data
 
-    def process_trail_data_string(self, raw_data_string):
+    def _process_trail_data_string(self, raw_data_string):
         """
         Function to parse trail data string into attributes, values and their units
         :param raw_data_string:
@@ -185,16 +185,19 @@ def offline_data_test():
             self.url = url
 
     test_page = MakeTestPage(html_data, 'Wikiloc_test_page-43199206')  # added trail id to fake URL
+    trail_obj = TrailScraper()
+    trail_obj.extract_trail_data(test_page)
+    trail_obj.convert_values()
+    trail_data = trail_obj.trail_data
 
-    trail_data = extract_trail_data(test_page)
-    trail_data = convert_values(trail_data)
     print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
     return trail_data
 
 
 def online_data_test():
     """ Function to test online extraction of trail data from a trail page on wikiloc.com"""
-    trail_data = get_trail("https://www.wikiloc.com/splitboard-trails/finsteraahorn-24124650")
+    trail_obj = TrailScraper()
+    trail_data = trail_obj.get_trail("https://www.wikiloc.com/splitboard-trails/finsteraahorn-24124650")
     print('\n'.join([f'{key} : {value}' for key, value in trail_data.items()]))
     return trail_data
     # check if raises ValueError in get_trail() in case of units mismatch - changed UNITS_MASTER just for this

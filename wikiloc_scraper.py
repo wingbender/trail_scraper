@@ -18,7 +18,7 @@
 import requests
 from bs4 import BeautifulSoup as bs
 from webfunctions import get_page
-from trail_scraper import get_trail
+from trail_scraper import TrailScraper
 import config as cfg
 import sys
 import db_handler
@@ -103,7 +103,8 @@ def main():
                     continue
                 try:
                     url = trail_urls[trail_id][1]
-                    trail_data = get_trail(url)
+                    trail_obj = TrailScraper()
+                    trail_data = trail_obj.get_trail(url)
                     extracted_trails_counter += 1
 
                     # for now print data to screen
@@ -159,7 +160,8 @@ def main():
 
 def test():
     url = 'https://www.wikiloc.com/running-trails/tp-bhandup-44546156'
-    trail_data = get_trail(url)
+    trail_obj = TrailScraper()
+    trail_data = trail_obj.get_trail(url)
     db_handler.insert_into_db([trail_data])
 
 
