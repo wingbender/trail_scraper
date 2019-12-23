@@ -142,6 +142,7 @@ class DBHandler:
                     except ValueError:
                         print(f"{trail_data['id']} category {trail_data['category']} does not match category list)")
                         category_id = None
+
                     try:
                         user_id = self.get_user_id(trail_data['user_id'], trail_data['user_name'])
                     except Exception as e:
