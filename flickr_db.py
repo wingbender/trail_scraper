@@ -66,4 +66,5 @@ if __name__ == '__main__':
             print(f"Failed to update database for trail {row['trail_id']}")
             print(e)
             continue
+    conn.commit()
     conn.close()
