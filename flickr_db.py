@@ -35,12 +35,8 @@ def get_trail_ids(country):
         else:
             return list(result)
 
-def update_image(trail_id, lat, lon, k, flick_obj):
-    """Retrieve k images from Flickr API per given lon/lat of trails
-    And upload them to the database
-    Use given flick_obj, instance of FlickrAPI class """
-    # get k images from Flickr
-    image_urls = flick_obj.get_photos_url(lat, lon, radius=5, no_of_photos=k)
+def update_image(trail_id, image_urls):
+    """Update database photo_urls field with image_urls list by specific trail_id"""
     with conn.cursor() as cursor:
         query = f"UPDATE trails.trails " \
                 f"SET photo_urls=" \
@@ -58,10 +54,16 @@ if __name__ == '__main__':
     flickr = Flickr()
     for row in data:
         try:
-            update_image(row['trail_id'], row['lat'], row['lon'], ap.args.p, flickr)
+            image_urls = flickr.get_photos_url(row['lat'], row['lon'], radius=5, no_of_photos=ap.args.p)
+        except Exception as e:
+            print(f"Failed to retrieve images urls for trail {row['trail_id']}")
+            print(e)
+            continue
+        try:
+            update_image(row['trail_id'], image_urls)
             print(f"Retrieved images urls and update database for trail {row['trail_id']}")
         except Exception as e:
-            print(f"Failed to retrieve images urls and update database for trail {row['trail_id']}")
+            print(f"Failed to update database for trail {row['trail_id']}")
             print(e)
             continue
     conn.close()
