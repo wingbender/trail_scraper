@@ -16,17 +16,24 @@ class ArgParser(ArgumentParser):
                             help='Enter the number of photos to extract from Flickr API. Defaults to 1')
         self.add_argument('-c', '--country', type=str, default='España',
                           metavar="country to get images urls. Defaults to 'España' (Spain)")
+        self.add_argument('-r', '--region', type=str, default='Andalucía',
+                          metavar="region to get images urls. Defaults to 'Andalucía' in Spain)")
         self.args = []
 
     def get_args(self):
         """ Save arguments and parse them from the CLI """
         self.args = self.parse_args()
 
-def get_trail_ids(country):
-    """Fucntion returns a list from the MySQL database of all trail_id in a given country"""
+def get_trail_ids(region, country):
+    """Function returns a list from the MySQL database of all trail_id in a given country"""
     with conn.cursor() as cursor:
-        query = f"SELECT trail_id, start_lon as lon, start_lat as lat " \
-                f"FROM trails.trails WHERE country='{pymysql.escape_string(country)}';"
+        if region is None:
+            query = f"SELECT trail_id, start_lon as lon, start_lat as lat " \
+                    f"FROM trails.trails WHERE country='{pymysql.escape_string(country)}';"
+        else:
+            query = f"SELECT trail_id, start_lon as lon, start_lat as lat " \
+                    f"FROM trails.trails WHERE country='{pymysql.escape_string(country)}'" \
+                    f"AND region='{pymysql.escape_string(region)}';"
         cursor.execute(query)
         result = cursor.fetchall()
         if result is None:
@@ -50,7 +57,7 @@ if __name__ == '__main__':
     ap.get_args()
 
     conn = get_connection()
-    data = get_trail_ids(ap.args.country)
+    data = get_trail_ids(ap.args.region, ap.args.country)
     flickr = Flickr()
     for row in data:
         try:
